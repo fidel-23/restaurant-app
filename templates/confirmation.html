@@ -1,0 +1,39 @@
+{% extends 'base.html' %} {% block content %}
+<section class="confirmation-page">
+  <div class="confirmation-box">
+    <h1>✅ Order Confirmed!</h1>
+    <p>Thank you, <strong>{{ order['customer_name'] }}</strong>!</p>
+    <p>Your order has been placed successfully.</p>
+
+    <div class="order-details">
+      <h3>Order #{{ order['id'] }}</h3>
+      <p>Phone: {{ order['customer_phone'] }}</p>
+      <p>Address: {{ order['customer_address'] }}</p>
+
+      <h3>Items Ordered</h3>
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>{{ item['name'] }}</td>
+            <td>{{ item['quantity'] }}</td>
+            <td>RWF {{ item['price'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h3>Total: RWF {{ order['total'] }}</h3>
+    </div>
+
+    <a href="{{ url_for('menu') }}" class="btn-primary">Order Again</a>
+  </div>
+</section>
+{% endblock %}

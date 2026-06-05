@@ -1,0 +1,27 @@
+{% extends 'base.html' %} {% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Welcome to QuickBite Kigali</h1>
+    <p>Fresh food, fast delivery, right to your door.</p>
+    <a href="{{ url_for('menu') }}" class="btn-primary">Order Now</a>
+  </div>
+</section>
+
+<section class="features">
+  <div class="feature">
+    <span>🍔</span>
+    <h3>Fresh Food</h3>
+    <p>Made fresh with quality ingredients every day.</p>
+  </div>
+  <div class="feature">
+    <span>🚀</span>
+    <h3>Fast Delivery</h3>
+    <p>Your order delivered in 30 minutes or less.</p>
+  </div>
+  <div class="feature">
+    <span>💳</span>
+    <h3>Easy Payment</h3>
+    <p>Pay with Mobile Money or card. Simple and secure.</p>
+  </div>
+</section>
+{% endblock %}

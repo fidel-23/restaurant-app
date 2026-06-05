@@ -1,0 +1,33 @@
+{% extends 'base.html' %} {% block content %}
+<section class="menu-page">
+  <h1>Our Menu</h1>
+
+  {% for category, items in categories.items() %}
+  <div class="category-section">
+    <h2>{{ category }}</h2>
+    <div class="product-grid">
+      {% for product in items %}
+      <div class="product-card">
+        <a href="{{ url_for('product', id=product['id']) }}">
+          <div class="product-image">🍽️</div>
+          <div class="product-info">
+            <h3>{{ product['name'] }}</h3>
+            <p>{{ product['description'] }}</p>
+            <span class="price">RWF {{ product['price'] }}</span>
+          </div>
+        </a>
+        <button
+          class="btn-primary add-to-cart"
+          data-id="{{ product['id'] }}"
+          data-name="{{ product['name'] }}"
+          data-price="{{ product['price'] }}"
+        >
+          Add to Cart
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}
