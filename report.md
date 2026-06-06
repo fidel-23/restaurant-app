@@ -5,7 +5,6 @@
 **Instructor:** Eric Maniraguha  
 **Student:** Fidel K. Worjloh  
 **Institution:** University of Lay Adventists of Kigali (UNILAK)
-**Final Year
 
 ---
 
