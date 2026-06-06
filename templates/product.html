@@ -1,7 +1,11 @@
 {% extends 'base.html' %} {% block content %}
 <section class="product-page">
   <div class="product-detail">
-    <div class="product-image-large">🍽️</div>
+    <img
+      src="{{ product['image'] }}"
+      alt="{{ product['name'] }}"
+      class="product-image-large"
+    />
     <div class="product-detail-info">
       <h1>{{ product['name'] }}</h1>
       <p class="category">{{ product['category'] }}</p>

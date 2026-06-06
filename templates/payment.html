@@ -1,0 +1,57 @@
+{% extends 'base.html' %} {% block content %}
+<section class="checkout-page">
+  <h1>💳 Payment</h1>
+
+  {% if error %}
+  <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <div class="order-summary">
+    <h3>Order #{{ order['id'] }}</h3>
+    <p>Total Amount: <strong>RWF {{ order['total'] }}</strong></p>
+  </div>
+
+  <form
+    action="{{ url_for('process_payment') }}"
+    method="POST"
+    id="payment-form"
+  >
+    <input type="hidden" name="order_id" value="{{ order['id'] }}" />
+
+    <div class="form-group">
+      <label>Card Number</label>
+      <div id="card-element"></div>
+    </div>
+
+    <div id="card-errors" class="error"></div>
+
+    <button type="submit" class="btn-primary">
+      Pay RWF {{ order['total'] }}
+    </button>
+  </form>
+</section>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe("{{ public_key }}");
+  const elements = stripe.elements();
+  const card = elements.create("card");
+  card.mount("#card-element");
+
+  const form = document.getElementById("payment-form");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const { token, error } = await stripe.createToken(card);
+    if (error) {
+      document.getElementById("card-errors").textContent = error.message;
+    } else {
+      const hiddenInput = document.createElement("input");
+      hiddenInput.setAttribute("type", "hidden");
+      hiddenInput.setAttribute("name", "stripeToken");
+      hiddenInput.setAttribute("value", token.id);
+      form.appendChild(hiddenInput);
+      form.submit();
+    }
+  });
+</script>
+{% endblock %}

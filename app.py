@@ -1,6 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from database import init_db, seed_db, get_db
+from dotenv import load_dotenv
+import stripe
+import os
 
+load_dotenv()
+
+app = Flask(__name__)
+app.secret_key = 'quickbite-secret-key'
+
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+stripe.api_key = STRIPE_SECRET_KEY
 app = Flask(__name__)
 app.secret_key = 'quickbite-secret-key'
 
@@ -49,7 +60,7 @@ def checkout():
         customer_name = request.form['name']
         customer_phone = request.form['phone']
         customer_address = request.form['address']
-        total = sum(item['price'] * item['quantity'] for item in cart)
+        total = sum(float(item['price']) * int(item['quantity']) for item in cart)
 
         conn = get_db()
         cursor = conn.cursor()
@@ -68,7 +79,7 @@ def checkout():
         conn.commit()
         conn.close()
         session['cart'] = []
-        return redirect(url_for('confirmation', order_id=order_id))
+        return redirect(url_for('payment', order_id=order_id))
 
     return render_template('checkout.html')
 
@@ -170,6 +181,34 @@ def dashboard():
 def admin_logout():
     session.pop('admin', None)
     return redirect(url_for('admin_login'))
+
+@app.route('/payment/<int:order_id>')
+def payment(order_id):
+    conn = get_db()
+    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    conn.close()
+    return render_template('payment.html', order=order, public_key=STRIPE_PUBLIC_KEY)
+
+@app.route('/payment/process', methods=['POST'])
+def process_payment():
+    order_id = request.form['order_id']
+    token = request.form['stripeToken']
+    conn = get_db()
+    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    try:
+        charge = stripe.Charge.create(
+            amount=int(order['total'] * 100),
+            currency='rwf',
+            source=token,
+            description=f'QuickBite Order #{order_id}'
+        )
+        conn.execute('UPDATE orders SET status = ? WHERE id = ?', ('paid', order_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('confirmation', order_id=order_id))
+    except stripe.error.StripeError as e:
+        conn.close()
+        return render_template('payment.html', error=str(e), order=order, public_key=STRIPE_PUBLIC_KEY)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
