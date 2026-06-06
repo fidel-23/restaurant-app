@@ -6,6 +6,11 @@
     <title>Dashboard - QuickBite Kigali</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    if (localStorage.getItem('lightMode') === 'true') {
+        document.body.classList.add('light-mode');
+    }
+</script>
 </head>
 <body>
 

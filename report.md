@@ -8,7 +8,7 @@
 
 ## 1. Introduction
 
-QuickBite Kigali is a modern restaurant ordering platform built for a local food business in Kigali, Rwanda. The platform allows customers to browse a menu, add items to a cart, place orders, and receive confirmation — all from their browser. The system also includes an admin dashboard for monitoring orders and revenue.
+QuickBite Kigali is a modern restaurant ordering platform built for a local food business in Kigali, Rwanda. The platform allows customers to browse a menu, add items to a cart, place orders, and pay securely online. The system also includes a full admin panel for managing orders, tracking inventory, and analyzing business performance.
 
 ---
 
@@ -22,37 +22,51 @@ Many local restaurants in Kigali still rely on phone calls or walk-in orders. Th
 
 - Build a responsive e-commerce web application for a restaurant
 - Allow customers to browse products by category, add items to cart, and place orders
-- Provide an admin dashboard with analytics on orders and revenue
+- Implement secure online payment using Stripe
+- Provide an admin dashboard with analytics, charts, and order management
+- Track inventory automatically and allow manual stock updates
 - Deploy the application online using Docker and CI/CD
-- Implement secure admin authentication
 
 ---
 
 ## 4. System Features
 
 - Homepage with restaurant branding and navigation
+- Mobile responsive design with hamburger menu
+- Dark mode toggle
 - Menu page with product categories (Burgers, Pizza, Sides, Drinks)
+- Real food images on all product cards
 - Product detail page with quantity selector
 - Shopping cart with add, remove, and update functionality
 - Checkout form with customer details and order summary
+- Stripe test payment gateway
 - Order confirmation page with full order details
+- About Us page with contact information
+- Customer reviews and star rating system
+- 404 error page
 - Admin login with session-based authentication
-- Analytics dashboard showing total orders, revenue, and popular items
+- Enhanced analytics dashboard with bar and doughnut charts
+- Order status management (Pending, Preparing, On the Way, Delivered, Paid)
+- Inventory tracker with color indicators (Green, Yellow, Red)
+- Automatic stock decrease when an order is paid
 
 ---
 
 ## 5. Technologies Used
 
-| Technology     | Purpose                        |
-| -------------- | ------------------------------ |
-| Python 3.13    | Backend programming language   |
-| Flask          | Web framework                  |
-| SQLite         | Database                       |
-| HTML/CSS       | Frontend structure and styling |
-| JavaScript     | Cart interactivity             |
-| Docker         | Containerization               |
-| GitHub Actions | CI/CD pipeline                 |
-| Render.com     | Live deployment                |
+| Technology     | Purpose                          |
+| -------------- | -------------------------------- |
+| Python 3.13    | Backend programming language     |
+| Flask          | Web framework                    |
+| SQLite         | Database                         |
+| HTML/CSS       | Frontend structure and styling   |
+| JavaScript     | Cart interactivity and dark mode |
+| Chart.js       | Analytics charts on dashboard    |
+| Stripe         | Test payment processing          |
+| python-dotenv  | Environment variable management  |
+| Docker         | Containerization                 |
+| GitHub Actions | CI/CD pipeline                   |
+| Render.com     | Live deployment                  |
 
 ---
 
@@ -60,9 +74,9 @@ Many local restaurants in Kigali still rely on phone calls or walk-in orders. Th
 
 The application follows a three-layer architecture:
 
-- **Frontend:** HTML templates rendered by Flask using Jinja2, styled with CSS
+- **Frontend:** HTML templates rendered by Flask using Jinja2, styled with CSS and JavaScript
 - **Backend:** Flask handles routing, session management, and business logic
-- **Database:** SQLite stores products, orders, order items, and admin credentials
+- **Database:** SQLite stores products, orders, order items, admin credentials, reviews, and inventory
 
 User requests flow from the browser → Flask routes → database → back to the browser as rendered HTML pages.
 
@@ -70,7 +84,7 @@ User requests flow from the browser → Flask routes → database → back to th
 
 ## 7. Screenshots
 
-_(Added screenshots of: Homepage, Menu, Cart, Checkout, Confirmation, Admin Dashboard)_
+_(Add screenshots of: Homepage, Menu, Cart, Checkout, Payment, Confirmation, About Us, Admin Dashboard, Inventory)_
 
 ---
 
@@ -104,7 +118,9 @@ This ensures that broken code is never deployed without being tested first.
 
 - Configuring Docker to bind to `0.0.0.0` instead of `127.0.0.1` so the app was accessible outside the container
 - Managing Flask sessions for the shopping cart across multiple pages
-- Setting up GitHub Actions to correctly build and test the application
+- Fixing ID type mismatches between integers and strings in cart operations
+- Setting up Stripe environment variables securely on Render
+- Making the app fully responsive on mobile devices
 
 ---
 
@@ -112,9 +128,10 @@ This ensures that broken code is never deployed without being tested first.
 
 - Integrate Mobile Money payment gateway (MTN MoMo or Airtel Money)
 - Add real-time order tracking for customers
-- Allow restaurant admin to update order status from the dashboard
+- Allow restaurant admin to update product details and add new menu items
 - Add product image upload functionality
 - Build a mobile app version
+- Add email notifications for order confirmation
 
 ---
 

@@ -8,6 +8,11 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+    <script>
+      if (localStorage.getItem("lightMode") === "true") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
   </head>
   <body>
     <section class="admin-login">
