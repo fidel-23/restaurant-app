@@ -238,5 +238,34 @@ def add_multiple_to_cart():
     session.modified = True
     return jsonify({'success': True, 'cart': cart})
 
+@app.route('/about', methods=['GET', 'POST'])
+def about():
+    conn = get_db()
+    success = False
+    error = None
+
+    if request.method == 'POST':
+        name = request.form['name']
+        rating = request.form.get('rating')
+        feedback = request.form['feedback']
+
+        if not rating:
+            error = 'Please select a rating.'
+        else:
+            conn.execute(
+                'INSERT INTO reviews (name, rating, feedback) VALUES (?, ?, ?)',
+                (name, int(rating), feedback)
+            )
+            conn.commit()
+            success = True
+
+    reviews = conn.execute('SELECT * FROM reviews ORDER BY created_at DESC').fetchall()
+    conn.close()
+    return render_template('about.html', reviews=reviews, success=success, error=error)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

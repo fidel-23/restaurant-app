@@ -470,3 +470,187 @@ body.dark-mode .form-group input {
   color: #eaeaea;
   border: 1px solid #444;
 }
+
+/* ─── ABOUT PAGE ─── */
+.about-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.about-hero {
+  background: linear-gradient(135deg, #e63946, #c1121f);
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+  margin-bottom: 40px;
+  border-radius: 10px;
+}
+
+.about-hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.about-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.about-story,
+.about-contact {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-story h2,
+.about-contact h2 {
+  color: #e63946;
+  margin-bottom: 15px;
+}
+
+.about-story p {
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.contact-info p {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+/* ─── FEEDBACK ─── */
+.feedback-section {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+}
+
+.feedback-section h2 {
+  color: #e63946;
+  margin-bottom: 10px;
+}
+
+.feedback-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 5px;
+  font-size: 2rem;
+  margin: 10px 0;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  opacity: 1;
+}
+
+.success-message {
+  background: #2a9d8f;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* ─── REVIEWS ─── */
+.reviews-section {
+  margin-top: 40px;
+}
+
+.reviews-section h2 {
+  color: #e63946;
+  margin-bottom: 20px;
+}
+
+.review-card {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 4px solid #e63946;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.review-date {
+  color: #999;
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+/* ─── 404 PAGE ─── */
+.error-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.error-container h1 {
+  font-size: 6rem;
+  color: #e63946;
+}
+
+.error-container h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.error-container p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+/* ─── DARK MODE ADDITIONS ─── */
+body.dark-mode .about-story,
+body.dark-mode .about-contact,
+body.dark-mode .feedback-section,
+body.dark-mode .review-card {
+  background-color: #16213e;
+  color: #eaeaea;
+}
+
+body.dark-mode .feedback-form textarea,
+body.dark-mode .feedback-section {
+  background-color: #16213e;
+  color: #eaeaea;
+}
+
+@media (max-width: 768px) {
+  .about-container {
+    grid-template-columns: 1fr;
+  }
+}
