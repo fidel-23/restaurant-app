@@ -41,9 +41,9 @@
       .then((res) => res.json())
       .then((data) => {
         const cart = data.cart;
-        const tbody = document.getElementById("cart-items");
         const cartEmpty = document.getElementById("cart-empty");
         const cartContent = document.getElementById("cart-content");
+        const tbody = document.getElementById("cart-items");
 
         if (cart.length === 0) {
           cartEmpty.style.display = "block";
@@ -57,42 +57,55 @@
         let total = 0;
 
         cart.forEach((item) => {
-          const subtotal = item.price * item.quantity;
+          const subtotal = parseFloat(item.price) * parseInt(item.quantity);
           total += subtotal;
-          tbody.innerHTML += `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>RWF ${item.price}</td>
-                        <td>
-                            <button onclick="updateQty(${item.id}, ${item.quantity - 1})">-</button>
-                            ${item.quantity}
-                            <button onclick="updateQty(${item.id}, ${item.quantity + 1})">+</button>
-                        </td>
-                        <td>RWF ${subtotal}</td>
-                        <td><button onclick="removeItem(${item.id})">❌</button></td>
-                    </tr>
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>RWF ${parseFloat(item.price).toFixed(0)}</td>
+                    <td>
+                        <button class="qty-btn" data-id="${item.id}" data-action="decrease">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="qty-btn" data-id="${item.id}" data-action="increase">+</button>
+                    </td>
+                    <td>RWF ${subtotal.toFixed(0)}</td>
+                    <td><button class="remove-btn" data-id="${item.id}">❌</button></td>
                 `;
+          tbody.appendChild(row);
         });
 
-        document.getElementById("cart-total").innerText = total;
+        document.getElementById("cart-total").innerText = total.toFixed(0);
+
+        document.querySelectorAll(".qty-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const id = parseInt(this.dataset.id);
+            const action = this.dataset.action;
+            const currentQty = parseInt(
+              this.parentElement.querySelector("span").innerText,
+            );
+            const newQty =
+              action === "increase" ? currentQty + 1 : currentQty - 1;
+            if (newQty < 1) return;
+            fetch("/api/cart/update", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: id, quantity: newQty }),
+            }).then(() => renderCart());
+          });
+        });
+
+        document.querySelectorAll(".remove-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const id = parseInt(this.dataset.id);
+            fetch("/api/cart/remove", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: id }),
+            }).then(() => renderCart());
+          });
+        });
       });
-  }
-
-  function updateQty(id, quantity) {
-    if (quantity < 1) return;
-    fetch("/api/cart/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, quantity }),
-    }).then(() => renderCart());
-  }
-
-  function removeItem(id) {
-    fetch("/api/cart/remove", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    }).then(() => renderCart());
   }
 </script>
 {% endblock %}

@@ -52,9 +52,44 @@
 
   function addToCartFromDetail(id, name, price) {
     let qty = parseInt(document.getElementById("qty").innerText);
-    for (let i = 0; i < qty; i++) {
-      addToCart(id, name, price);
-    }
+    fetch("/api/cart/add-multiple", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: id,
+        name: name,
+        price: parseFloat(price),
+        quantity: qty,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        updateCartCount(data.cart);
+        showToast(qty + "x " + name + " added to cart!");
+      });
+  }
+
+  function showToast(message) {
+    const toast = document.createElement("div");
+    toast.innerText = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #e63946;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => toast.remove(), 500);
+    }, 2500);
   }
 </script>
 {% endblock %}

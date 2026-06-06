@@ -104,19 +104,26 @@ def add_to_cart():
     cart = session.get('cart', [])
     for item in cart:
         if item['id'] == data['id']:
-            item['quantity'] += 1
+            item['quantity'] = int(item['quantity']) + 1
             session['cart'] = cart
+            session.modified = True
             return jsonify({'success': True, 'cart': cart})
-    cart.append({'id': data['id'], 'name': data['name'], 'price': data['price'], 'quantity': 1})
+    cart.append({
+        'id': data['id'],
+        'name': data['name'],
+        'price': float(data['price']),
+        'quantity': 1
+    })
     session['cart'] = cart
+    session.modified = True
     return jsonify({'success': True, 'cart': cart})
-
 @app.route('/api/cart/remove', methods=['POST'])
 def remove_from_cart():
     data = request.json
     cart = session.get('cart', [])
-    cart = [item for item in cart if item['id'] != data['id']]
+    cart = [item for item in cart if int(item['id']) != int(data['id'])]
     session['cart'] = cart
+    session.modified = True
     return jsonify({'success': True, 'cart': cart})
 
 @app.route('/api/cart/update', methods=['POST'])
@@ -124,9 +131,10 @@ def update_cart():
     data = request.json
     cart = session.get('cart', [])
     for item in cart:
-        if item['id'] == data['id']:
-            item['quantity'] = data['quantity']
+        if int(item['id']) == int(data['id']):
+            item['quantity'] = int(data['quantity'])
     session['cart'] = cart
+    session.modified = True
     return jsonify({'success': True, 'cart': cart})
 
 @app.route('/api/cart', methods=['GET'])
@@ -209,6 +217,26 @@ def process_payment():
     except stripe.error.StripeError as e:
         conn.close()
         return render_template('payment.html', error=str(e), order=order, public_key=STRIPE_PUBLIC_KEY)
+
+@app.route('/api/cart/add-multiple', methods=['POST'])
+def add_multiple_to_cart():
+    data = request.json
+    cart = session.get('cart', [])
+    for item in cart:
+        if int(item['id']) == int(data['id']):
+            item['quantity'] = int(item['quantity']) + int(data['quantity'])
+            session['cart'] = cart
+            session.modified = True
+            return jsonify({'success': True, 'cart': cart})
+    cart.append({
+        'id': data['id'],
+        'name': data['name'],
+        'price': float(data['price']),
+        'quantity': int(data['quantity'])
+    })
+    session['cart'] = cart
+    session.modified = True
+    return jsonify({'success': True, 'cart': cart})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
