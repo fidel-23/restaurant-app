@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory - QuickBite Kigali</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="{{ url_for('dashboard') }}" class="nav-logo"
+          >🍔 QuickBite Admin</a
+        >
+        <div style="display: flex; gap: 10px">
+          <a href="{{ url_for('dashboard') }}" class="btn-secondary"
+            >📊 Dashboard</a
+          >
+          <a href="{{ url_for('admin_logout') }}" class="btn-secondary"
+            >Logout</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <section class="dashboard">
+      <h1>📦 Inventory Tracker</h1>
+      <p style="margin-bottom: 30px">
+        Monitor your stock levels and know what to reorder.
+      </p>
+
+      <div class="inventory-legend">
+        <span class="legend-item"
+          ><span class="dot green"></span> In Stock</span
+        >
+        <span class="legend-item"
+          ><span class="dot yellow"></span> Running Low</span
+        >
+        <span class="legend-item"
+          ><span class="dot red"></span> Out of Stock</span
+        >
+      </div>
+
+      <div class="inventory-grid">
+        {% for item in inventory %}
+        <div class="inventory-card">
+          <div class="inventory-header">
+            <h3>{{ item['name'] }}</h3>
+            <span class="category-tag">{{ item['category'] }}</span>
+          </div>
+
+          <div class="stock-bar-container">
+            <div
+              class="stock-bar {{ item['status'] }}"
+              style="--stock-width: {{ item['percentage'] }}%; width: var(--stock-width);"
+            ></div>
+          </div>
+
+          <div class="inventory-details">
+            <span class="stock-percentage">{{ item['percentage'] }}%</span>
+            <span class="stock-label {{ item['status'] }}">
+              {% if item['status'] == 'green' %}✅ In Stock {% elif
+              item['status'] == 'yellow' %}⚠️ Running Low {% else %}❌ Out of
+              Stock {% endif %}
+            </span>
+          </div>
+
+          <div class="stock-update">
+            <form method="POST" action="{{ url_for('update_inventory') }}">
+              <input type="hidden" name="product_id" value="{{ item['id'] }}" />
+              <input
+                type="number"
+                name="stock"
+                value="{{ item['stock'] }}"
+                min="0"
+                max="100"
+              />
+              <button type="submit" class="btn-primary">Update</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </body>
+</html>

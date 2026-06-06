@@ -168,22 +168,56 @@ def dashboard():
     conn = get_db()
     total_orders = conn.execute('SELECT COUNT(*) FROM orders').fetchone()[0]
     total_revenue = conn.execute('SELECT SUM(total) FROM orders').fetchone()[0] or 0
+    total_customers = conn.execute('SELECT COUNT(DISTINCT customer_phone) FROM orders').fetchone()[0]
+    avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
     recent_orders = conn.execute('SELECT * FROM orders ORDER BY created_at DESC LIMIT 10').fetchall()
+
     popular_items = conn.execute('''
         SELECT p.name, SUM(oi.quantity) as total_sold
         FROM order_items oi
         JOIN products p ON oi.product_id = p.id
         GROUP BY p.name
         ORDER BY total_sold DESC
-        LIMIT 5
+        LIMIT 6
     ''').fetchall()
+
+    category_revenue = conn.execute('''
+        SELECT p.category, SUM(oi.quantity * oi.price) as revenue
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        GROUP BY p.category
+    ''').fetchall()
+
     conn.close()
+
+    popular_labels = [item['name'] for item in popular_items]
+    popular_data = [item['total_sold'] for item in popular_items]
+    category_labels = [item['category'] for item in category_revenue]
+    category_data = [item['revenue'] for item in category_revenue]
+
     return render_template('admin/dashboard.html',
         total_orders=total_orders,
         total_revenue=total_revenue,
+        total_customers=total_customers,
+        avg_order_value=avg_order_value,
         recent_orders=recent_orders,
-        popular_items=popular_items
+        popular_labels=popular_labels,
+        popular_data=popular_data,
+        category_labels=category_labels,
+        category_data=category_data
     )
+
+@app.route('/admin/update-status', methods=['POST'])
+def update_order_status():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    order_id = request.form['order_id']
+    status = request.form['status']
+    conn = get_db()
+    conn.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard'))
 
 @app.route('/admin/logout')
 def admin_logout():
@@ -211,13 +245,16 @@ def process_payment():
             description=f'QuickBite Order #{order_id}'
         )
         conn.execute('UPDATE orders SET status = ? WHERE id = ?', ('paid', order_id))
+        order_items = conn.execute('SELECT * FROM order_items WHERE order_id = ?', (order_id,)).fetchall()
+        for item in order_items:
+            conn.execute('UPDATE products SET stock = MAX(0, stock - ?) WHERE id = ?',
+                        (item['quantity'], item['product_id']))
         conn.commit()
         conn.close()
         return redirect(url_for('confirmation', order_id=order_id))
     except stripe.error.StripeError as e:
         conn.close()
         return render_template('payment.html', error=str(e), order=order, public_key=STRIPE_PUBLIC_KEY)
-
 @app.route('/api/cart/add-multiple', methods=['POST'])
 def add_multiple_to_cart():
     data = request.json
@@ -266,6 +303,47 @@ def about():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+@app.route('/admin/inventory')
+def inventory():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db()
+    products = conn.execute('SELECT * FROM products').fetchall()
+    conn.close()
+
+    inventory = []
+    for p in products:
+        stock = p['stock']
+        percentage = stock
+        if stock >= 50:
+            status = 'green'
+        elif stock >= 20:
+            status = 'yellow'
+        else:
+            status = 'red'
+        inventory.append({
+            'id': p['id'],
+            'name': p['name'],
+            'category': p['category'],
+            'stock': stock,
+            'percentage': percentage,
+            'status': status
+        })
+
+    return render_template('admin/inventory.html', inventory=inventory)
+
+@app.route('/admin/update-inventory', methods=['POST'])
+def update_inventory():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    product_id = request.form['product_id']
+    stock = int(request.form['stock'])
+    conn = get_db()
+    conn.execute('UPDATE products SET stock = ? WHERE id = ?', (stock, product_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('inventory'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

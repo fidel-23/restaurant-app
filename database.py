@@ -16,7 +16,8 @@ def init_db():
             description TEXT,
             price REAL NOT NULL,
             category TEXT NOT NULL,
-            image TEXT
+            image TEXT,
+            stock INTEGER DEFAULT 100
         );
 
         CREATE TABLE IF NOT EXISTS orders (
@@ -82,9 +83,9 @@ def seed_db():
     ('Mango Smoothie', 'Fresh blended mango smoothie', 1500, 'Drinks', 'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400'),
 ]
         cursor.executemany(
-            'INSERT INTO products (name, description, price, category, image) VALUES (?,?,?,?,?)',
-            products
-        )
+    'INSERT INTO products (name, description, price, category, image, stock) VALUES (?,?,?,?,?,?)',
+    [(p[0], p[1], p[2], p[3], p[4], 100) for p in products]
+)
 
     cursor.execute("SELECT COUNT(*) FROM admin")
     if cursor.fetchone()[0] == 0:
