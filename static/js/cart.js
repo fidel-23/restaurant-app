@@ -30,3 +30,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+// Dark mode toggle
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  const isDark = document.body.classList.contains("dark-mode");
+  localStorage.setItem("darkMode", isDark);
+  updateDarkModeButton(isDark);
+}
+
+function updateDarkModeButton(isDark) {
+  const btn = document.getElementById("dark-mode-btn");
+  if (btn) btn.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const savedMode = localStorage.getItem("darkMode");
+  if (savedMode === "true") {
+    document.body.classList.add("dark-mode");
+  }
+  updateDarkModeButton(savedMode === "true");
+});

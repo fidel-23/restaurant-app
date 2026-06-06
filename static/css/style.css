@@ -423,3 +423,39 @@ footer {
     gap: 10px;
   }
 }
+/* ─── DARK MODE ─── */
+body.dark-mode {
+  background-color: #1a1a2e;
+  color: #eaeaea;
+}
+
+body.dark-mode .navbar {
+  background-color: #16213e;
+}
+
+body.dark-mode .product-card,
+body.dark-mode .login-box,
+body.dark-mode .confirmation-box,
+body.dark-mode .order-summary,
+body.dark-mode .dashboard-section {
+  background-color: #16213e;
+  color: #eaeaea;
+}
+
+body.dark-mode .cart-table th {
+  background-color: #16213e;
+}
+
+body.dark-mode .cart-table td {
+  border-bottom: 1px solid #333;
+}
+
+body.dark-mode footer {
+  background-color: #16213e;
+}
+
+body.dark-mode .form-group input {
+  background-color: #16213e;
+  color: #eaeaea;
+  border: 1px solid #444;
+}
