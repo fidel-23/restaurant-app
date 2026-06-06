@@ -33,6 +33,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .nav-logo {
@@ -925,6 +926,13 @@ body.dark-mode .stock-bar-container {
 @media (max-width: 768px) {
   .hamburger {
     display: block;
+    margin-left: auto;
+  }
+  .nav-logo {
+    order: 1;
+  }
+  .hamburger {
+    order: 2;
   }
   .nav-links {
     display: none;
@@ -933,6 +941,7 @@ body.dark-mode .stock-bar-container {
     background-color: #e63946;
     padding: 10px 0;
     text-align: center;
+    order: 3;
   }
   .nav-links.open {
     display: flex;
