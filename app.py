@@ -12,7 +12,6 @@ app.secret_key = 'quickbite-secret-key'
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 stripe.api_key = STRIPE_SECRET_KEY
-app = Flask(__name__)
 app.secret_key = 'quickbite-secret-key'
 
 # Initialize database on startup
