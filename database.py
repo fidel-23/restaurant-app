@@ -84,7 +84,7 @@ def seed_db():
 ]
         cursor.executemany(
     'INSERT INTO products (name, description, price, category, image, stock) VALUES (?,?,?,?,?,?)',
-    [(p[0], p[1], p[2], p[3], p[4], 100) for p in products]
+    [(p[0], p[1], p[2], p[3], p[4], 1000) for p in products]
 )
 
     cursor.execute("SELECT COUNT(*) FROM admin")
