@@ -17,8 +17,33 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.execute('''
+        CREATE TABLE IF NOT EXISTS restaurants (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT,
+            address TEXT,
+            phone TEXT,
+            email TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS customers (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            phone TEXT,
+            address TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS products (
             id SERIAL PRIMARY KEY,
+            restaurant_id INTEGER REFERENCES restaurants(id),
             name TEXT NOT NULL,
             description TEXT,
             price REAL NOT NULL,
@@ -31,6 +56,8 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
             id SERIAL PRIMARY KEY,
+            restaurant_id INTEGER REFERENCES restaurants(id),
+            customer_id INTEGER REFERENCES customers(id),
             customer_name TEXT NOT NULL,
             customer_phone TEXT NOT NULL,
             customer_address TEXT NOT NULL,
@@ -43,18 +70,17 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS order_items (
             id SERIAL PRIMARY KEY,
-            order_id INTEGER,
-            product_id INTEGER,
+            order_id INTEGER REFERENCES orders(id),
+            product_id INTEGER REFERENCES products(id),
             quantity INTEGER,
-            price REAL,
-            FOREIGN KEY (order_id) REFERENCES orders(id),
-            FOREIGN KEY (product_id) REFERENCES products(id)
+            price REAL
         )
     ''')
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS admin (
             id SERIAL PRIMARY KEY,
+            restaurant_id INTEGER REFERENCES restaurants(id),
             username TEXT NOT NULL,
             password TEXT NOT NULL
         )
@@ -63,9 +89,21 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS reviews (
             id SERIAL PRIMARY KEY,
+            restaurant_id INTEGER REFERENCES restaurants(id),
+            customer_id INTEGER REFERENCES customers(id),
             name TEXT NOT NULL,
             rating INTEGER NOT NULL,
             feedback TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS password_resets (
+            id SERIAL PRIMARY KEY,
+            customer_id INTEGER REFERENCES customers(id),
+            token TEXT NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -76,6 +114,13 @@ def init_db():
 def seed_db():
     conn = get_db()
     cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM restaurants")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute(
+            'INSERT INTO restaurants (name, description, address, phone, email) VALUES (%s,%s,%s,%s,%s)',
+            ('QuickBite Kigali', 'Fresh food, fast delivery, right to your door.', 'KK 318 St, Kigali, Rwanda', '+250 788 123 456', 'info@quickbitekigali.com')
+        )
 
     cursor.execute("SELECT COUNT(*) FROM products")
     if cursor.fetchone()[0] == 0:
@@ -98,15 +143,16 @@ def seed_db():
             ('Mineral Water', '500ml chilled water', 500, 'Drinks', 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400', 100),
             ('Mango Smoothie', 'Fresh blended mango smoothie', 1500, 'Drinks', 'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400', 100),
         ]
-        cursor.executemany(
-            'INSERT INTO products (name, description, price, category, image, stock) VALUES (%s,%s,%s,%s,%s,%s)',
-            products
-        )
+        for p in products:
+            cursor.execute(
+                'INSERT INTO products (restaurant_id, name, description, price, category, image, stock) VALUES (1,%s,%s,%s,%s,%s,%s)',
+                p
+            )
 
     cursor.execute("SELECT COUNT(*) FROM admin")
     if cursor.fetchone()[0] == 0:
         cursor.execute(
-            'INSERT INTO admin (username, password) VALUES (%s, %s)',
+            'INSERT INTO admin (restaurant_id, username, password) VALUES (1, %s, %s)',
             ('admin', 'quickbite2024')
         )
 
