@@ -77,6 +77,7 @@ def seed_db():
     ('Coleslaw', 'Fresh creamy coleslaw', 1000, 'Sides', 'https://images.unsplash.com/photo-1625938144755-652e08e359b7?w=400'),
     ('Onion Rings', 'Crispy battered onion rings', 1800, 'Sides', 'https://images.unsplash.com/photo-1639024471283-03518883512d?w=400'),
     ('Chicken Wings', '6 pieces spicy chicken wings', 3000, 'Sides', 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=400'),
+    ('Grilled Tilapia', 'Fresh grilled tilapia with lemon butter sauce and vegetables', 4500, 'Sides', 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400', 50),
     ('Coca Cola', 'Chilled 500ml bottle', 800, 'Drinks', 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400'),
     ('Fresh Juice', 'Mixed fruit juice', 1200, 'Drinks', 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400'),
     ('Mineral Water', '500ml chilled water', 500, 'Drinks', 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400'),
