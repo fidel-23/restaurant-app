@@ -1,0 +1,72 @@
+{% extends 'base.html' %} {% block content %}
+<section class="auth-page">
+  <div class="auth-box">
+    <h1>Welcome Back</h1>
+    <p class="auth-subtitle">Login to your QuickBite account</p>
+
+    {% if error %}
+    <div class="auth-error">❌ {{ error }}</div>
+    {% endif %} {% if success %}
+    <div class="success-message">✅ {{ success }}</div>
+    {% endif %}
+
+    <form
+      method="POST"
+      action="{{ url_for('customer_login') }}"
+      id="login-form"
+    >
+      <div class="form-group">
+        <label>Email Address</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="name@example.com"
+          required
+        />
+        <span class="field-error" id="email-error"></span>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Your password"
+          required
+        />
+        <span class="field-error" id="password-error"></span>
+      </div>
+
+      <div style="text-align: right; margin-bottom: 20px">
+        <a
+          href="{{ url_for('forgot_password') }}"
+          style="color: var(--accent); font-size: 0.9rem"
+          >Forgot password?</a
+        >
+      </div>
+
+      <button type="submit" class="btn-primary" style="width: 100%">
+        Login
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Don't have an account?
+      <a href="{{ url_for('register') }}">Register here</a>
+    </p>
+  </div>
+</section>
+
+<script>
+  document.getElementById("email").addEventListener("input", function () {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.value)) {
+      document.getElementById("email-error").innerText =
+        "Please enter a valid email address";
+    } else {
+      document.getElementById("email-error").innerText = "";
+    }
+  });
+</script>
+{% endblock %}

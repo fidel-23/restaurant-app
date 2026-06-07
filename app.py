@@ -62,12 +62,13 @@ def checkout():
         customer_phone = request.form['phone']
         customer_address = request.form['address']
         total = sum(float(item['price']) * int(item['quantity']) for item in cart)
+        customer_id = session['customer']['id'] if session.get('customer') else None
 
         conn = get_db()
         cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
         cursor.execute(
-            'INSERT INTO orders (customer_name, customer_phone, customer_address, total) VALUES (%s,%s,%s,%s) RETURNING id',
-            (customer_name, customer_phone, customer_address, total)
+            'INSERT INTO orders (restaurant_id, customer_id, customer_name, customer_phone, customer_address, total) VALUES (1,%s,%s,%s,%s,%s) RETURNING id',
+            (customer_id, customer_name, customer_phone, customer_address, total)
         )
         order_id = cursor.fetchone()['id']
 
@@ -82,7 +83,8 @@ def checkout():
         session['cart'] = []
         return redirect(url_for('payment', order_id=order_id))
 
-    return render_template('checkout.html')
+    customer = session.get('customer')
+    return render_template('checkout.html', customer=customer)
 
 @app.route('/confirmation/<int:order_id>')
 def confirmation(order_id):
@@ -435,6 +437,225 @@ def about():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+import bcrypt
+import secrets
+from datetime import datetime, timedelta
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        address = request.form['address']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if password != confirm_password:
+            return render_template('register.html', error='Passwords do not match')
+
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        conn = get_db()
+        cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+
+        cursor.execute('SELECT id FROM customers WHERE email = %s', (email,))
+        existing = cursor.fetchone()
+        if existing:
+            conn.close()
+            return render_template('register.html', error='An account with this email already exists')
+
+        cursor.execute(
+            'INSERT INTO customers (name, email, password, phone, address) VALUES (%s,%s,%s,%s,%s) RETURNING id',
+            (name, email, hashed, phone, address)
+        )
+        customer_id = cursor.fetchone()['id']
+
+        cursor.execute(
+            'UPDATE orders SET customer_id = %s WHERE customer_name = %s AND customer_id IS NULL',
+            (customer_id, name)
+        )
+
+        conn.commit()
+        conn.close()
+
+        session['customer'] = {'id': customer_id, 'name': name, 'email': email, 'phone': phone, 'address': address}
+        return redirect(url_for('profile'))
+
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def customer_login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        conn = get_db()
+        cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+        cursor.execute('SELECT * FROM customers WHERE email = %s', (email,))
+        customer = cursor.fetchone()
+        conn.close()
+
+        if customer and bcrypt.checkpw(password.encode('utf-8'), customer['password'].encode('utf-8')):
+            session['customer'] = {
+                'id': customer['id'],
+                'name': customer['name'],
+                'email': customer['email'],
+                'phone': customer['phone'],
+                'address': customer['address']
+            }
+            return redirect(url_for('profile'))
+
+        return render_template('customer_login.html', error='Invalid email or password')
+
+    return render_template('customer_login.html')
+
+@app.route('/logout')
+def customer_logout():
+    session.pop('customer', None)
+    return redirect(url_for('index'))
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if not session.get('customer'):
+        return redirect(url_for('customer_login'))
+
+    customer_id = session['customer']['id']
+    feedback_success = False
+
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'feedback':
+            rating = request.form.get('rating')
+            feedback = request.form['feedback']
+            if rating and feedback:
+                cursor.execute(
+                    'INSERT INTO reviews (restaurant_id, customer_id, name, rating, feedback) VALUES (1, %s, %s, %s, %s)',
+                    (customer_id, session['customer']['name'], int(rating), feedback)
+                )
+                conn.commit()
+                feedback_success = True
+
+    cursor.execute('SELECT * FROM orders WHERE customer_id = %s ORDER BY created_at DESC', (customer_id,))
+    orders = cursor.fetchall()
+
+    orders_with_items = []
+    for order in orders:
+        cursor.execute('''
+            SELECT p.name, oi.quantity, oi.price
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = %s
+        ''', (order['id'],))
+        items = cursor.fetchall()
+        order_dict = dict(order)
+        order_dict['items'] = items
+        orders_with_items.append(order_dict)
+
+    conn.close()
+    return render_template('profile.html',
+        customer=session['customer'],
+        orders=orders_with_items,
+        feedback_success=feedback_success
+    )
+
+@app.route('/reorder', methods=['POST'])
+def reorder():
+    if not session.get('customer'):
+        return redirect(url_for('customer_login'))
+
+    order_id = request.form['order_id']
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+    cursor.execute('''
+        SELECT p.id, p.name, p.price, oi.quantity
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = %s
+    ''', (order_id,))
+    items = cursor.fetchall()
+    conn.close()
+
+    cart = session.get('cart', [])
+    for item in items:
+        found = False
+        for cart_item in cart:
+            if int(cart_item['id']) == int(item['id']):
+                cart_item['quantity'] = int(cart_item['quantity']) + int(item['quantity'])
+                found = True
+                break
+        if not found:
+            cart.append({
+                'id': item['id'],
+                'name': item['name'],
+                'price': float(item['price']),
+                'quantity': int(item['quantity'])
+            })
+
+    session['cart'] = cart
+    session.modified = True
+    return redirect(url_for('cart'))
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        conn = get_db()
+        cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+        cursor.execute('SELECT * FROM customers WHERE email = %s', (email,))
+        customer = cursor.fetchone()
+
+        if customer:
+            token = secrets.token_urlsafe(32)
+            expires_at = datetime.now() + timedelta(hours=1)
+            cursor.execute(
+                'INSERT INTO password_resets (customer_id, token, expires_at) VALUES (%s, %s, %s)',
+                (customer['id'], token, expires_at)
+            )
+            conn.commit()
+            reset_link = url_for('reset_password', token=token, _external=True)
+            print(f"Reset link: {reset_link}")
+
+        conn.close()
+        return render_template('forgot_password.html', success='If an account exists with that email, a reset link has been sent.')
+
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+    cursor.execute(
+        'SELECT * FROM password_resets WHERE token = %s AND expires_at > NOW()',
+        (token,)
+    )
+    reset = cursor.fetchone()
+
+    if not reset:
+        conn.close()
+        return render_template('reset_password.html', error='This reset link is invalid or has expired.', token=token)
+
+    if request.method == 'POST':
+        password = request.form['password']
+        confirm = request.form['confirm_password']
+
+        if password != confirm:
+            conn.close()
+            return render_template('reset_password.html', error='Passwords do not match.', token=token)
+
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        cursor.execute('UPDATE customers SET password = %s WHERE id = %s', (hashed, reset['customer_id']))
+        cursor.execute('DELETE FROM password_resets WHERE token = %s', (token,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('customer_login'))
+
+    conn.close()
+    return render_template('reset_password.html', token=token)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

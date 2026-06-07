@@ -1,0 +1,95 @@
+{% extends 'base.html' %} {% block content %}
+<section class="profile-page">
+  <div class="profile-header">
+    <div class="profile-avatar">{{ customer['name'][0].upper() }}</div>
+    <div>
+      <h1>{{ customer['name'] }}</h1>
+      <p>{{ customer['email'] }}</p>
+      <p>{{ customer['phone'] }}</p>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <div class="profile-section">
+      <h2>Order History</h2>
+      {% if orders %} {% for order in orders %}
+      <div class="order-card">
+        <div class="order-card-header">
+          <span><strong>Order #{{ order['id'] }}</strong></span>
+          <span class="status-badge status-{{ order['status'] }}"
+            >{{ order['status'] }}</span
+          >
+          <span style="color: var(--text-secondary); font-size: 0.85rem"
+            >{{ order['created_at'].strftime('%b %d, %Y') }}</span
+          >
+        </div>
+        <div class="order-card-items">
+          {% for item in order['items'] %}
+          <p>
+            {{ item['name'] }} x{{ item['quantity'] }} — RWF {{ item['price'] }}
+          </p>
+          {% endfor %}
+        </div>
+        <div class="order-card-footer">
+          <strong style="color: var(--accent)"
+            >Total: RWF {{ order['total'] }}</strong
+          >
+          <form method="POST" action="{{ url_for('reorder') }}">
+            <input type="hidden" name="order_id" value="{{ order['id'] }}" />
+            <button
+              type="submit"
+              class="btn-secondary"
+              style="padding: 6px 16px; font-size: 0.85rem"
+            >
+              🔄 Reorder
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <p style="color: var(--text-secondary)">
+        You have not placed any orders yet.
+        <a href="{{ url_for('menu') }}" style="color: var(--accent)"
+          >Browse the menu</a
+        >
+      </p>
+      {% endif %}
+    </div>
+
+    <div class="profile-section">
+      <h2>Submit Feedback</h2>
+      {% if feedback_success %}
+      <div class="success-message">✅ Thank you for your feedback!</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('profile') }}">
+        <input type="hidden" name="action" value="feedback" />
+        <div class="form-group">
+          <label>Rating</label>
+          <div class="star-rating">
+            <input type="radio" name="rating" value="5" id="star5" />
+            <label for="star5">⭐</label>
+            <input type="radio" name="rating" value="4" id="star4" />
+            <label for="star4">⭐</label>
+            <input type="radio" name="rating" value="3" id="star3" />
+            <label for="star3">⭐</label>
+            <input type="radio" name="rating" value="2" id="star2" />
+            <label for="star2">⭐</label>
+            <input type="radio" name="rating" value="1" id="star1" />
+            <label for="star1">⭐</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Your Feedback</label>
+          <textarea
+            name="feedback"
+            rows="4"
+            placeholder="Tell us about your experience..."
+          ></textarea>
+        </div>
+        <button type="submit" class="btn-primary">Submit Feedback</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -27,6 +27,23 @@
               >🛒 Cart <span id="cart-count">0</span></a
             >
           </li>
+          {% if session.get('customer') %}
+          <li>
+            <a href="{{ url_for('profile') }}"
+              >👤 {{ session['customer']['name'].split()[0] }}</a
+            >
+          </li>
+          <li>
+            <a href="{{ url_for('customer_logout') }}" class="btn-secondary"
+              >Logout</a
+            >
+          </li>
+          {% else %}
+          <li><a href="{{ url_for('customer_login') }}">Login</a></li>
+          <li>
+            <a href="{{ url_for('register') }}" class="btn-primary">Register</a>
+          </li>
+          {% endif %}
           <li>
             <button
               id="dark-mode-btn"
