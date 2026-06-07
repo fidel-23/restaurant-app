@@ -36,6 +36,7 @@ Many local restaurants in Kigali still rely on phone calls, walk-in orders, or i
 ## 4. System Features
 
 ### Customer-Facing Features
+
 - Homepage with hero section, feature highlights, and call-to-action
 - Responsive navigation with hamburger menu for mobile devices
 - Light/Dark mode toggle
@@ -52,6 +53,7 @@ Many local restaurants in Kigali still rely on phone calls, walk-in orders, or i
 - Custom 404 error page
 
 ### Admin Features
+
 - Secure admin login with session-based authentication
 - Analytics dashboard with:
   - Total orders counter
@@ -72,19 +74,19 @@ Many local restaurants in Kigali still rely on phone calls, walk-in orders, or i
 
 ## 5. Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| Python 3.13 | Backend programming language |
-| Flask | Web framework |
-| SQLite | Database |
-| HTML/CSS | Frontend structure and styling |
-| JavaScript | Cart interactivity, dark mode, hamburger menu |
-| Chart.js | Analytics charts on admin dashboard |
-| Stripe | Test payment processing |
-| python-dotenv | Secure environment variable management |
-| Docker | Application containerization |
-| GitHub Actions | CI/CD pipeline |
-| Render.com | Live cloud deployment |
+| Technology     | Purpose                                       |
+| -------------- | --------------------------------------------- |
+| Python 3.13    | Backend programming language                  |
+| Flask          | Web framework                                 |
+| SQLite         | Database                                      |
+| HTML/CSS       | Frontend structure and styling                |
+| JavaScript     | Cart interactivity, dark mode, hamburger menu |
+| Chart.js       | Analytics charts on admin dashboard           |
+| Stripe         | Test payment processing                       |
+| python-dotenv  | Secure environment variable management        |
+| Docker         | Application containerization                  |
+| GitHub Actions | CI/CD pipeline                                |
+| Render.com     | Live cloud deployment                         |
 
 ---
 
@@ -103,19 +105,19 @@ Browser → Flask Route → Database Query → Jinja2 Template → Rendered HTML
 
 ## 7. Database Structure
 
-| Table | Purpose |
-|---|---|
-| products | Stores menu items with name, description, price, category, image, and stock |
-| orders | Stores customer orders with name, phone, address, total, and status |
-| order_items | Links orders to products with quantity and price |
-| admin | Stores admin credentials |
-| reviews | Stores customer feedback and star ratings |
+| Table       | Purpose                                                                     |
+| ----------- | --------------------------------------------------------------------------- |
+| products    | Stores menu items with name, description, price, category, image, and stock |
+| orders      | Stores customer orders with name, phone, address, total, and status         |
+| order_items | Links orders to products with quantity and price                            |
+| admin       | Stores admin credentials                                                    |
+| reviews     | Stores customer feedback and star ratings                                   |
 
 ---
 
 ## 8. Screenshots
 
-*(Screenshots of: Homepage, Menu, Product Detail, Cart, Checkout, Payment, Confirmation, About Us, Admin Dashboard, Inventory Tracker)*
+_(Screenshots of: Homepage, Menu, Product Detail, Cart, Checkout, Payment, Confirmation, About Us, Admin Dashboard, Inventory Tracker)_
 
 ---
 
@@ -142,6 +144,7 @@ https://restaurant-app-0oya.onrender.com/admin/login
 The project uses GitHub Actions for continuous integration and deployment. The pipeline is defined in `.github/workflows/deploy.yml` and triggers automatically on every push to the `main` branch.
 
 **Pipeline Steps:**
+
 1. Check out the source code
 2. Set up Python 3.13
 3. Install all project dependencies from `requirements.txt`
@@ -156,8 +159,7 @@ This ensures that every code change is automatically tested and verified before 
 
 The application is fully containerized using Docker. The `Dockerfile` defines the build process and the `docker-compose.yml` manages the service configuration.
 
-**To run locally with Docker:**
----
+## **To run locally with Docker:**
 
 ## 14. Challenges Encountered
 
@@ -185,3 +187,4 @@ The application is fully containerized using Docker. The `Dockerfile` defines th
 QuickBite Kigali is a complete, production-ready e-commerce web application built from scratch using modern tools and best practices. The platform solves a real problem for local restaurants in Rwanda by bringing their operations online in a simple, affordable, and professional way. Every requirement of the project brief has been met — including responsive UI, database integration, shopping cart, checkout, payment, GitHub version control, Docker containerization, CI/CD pipeline, and live deployment.
 
 The project demonstrates not just technical implementation but also business thinking — from inventory management to analytics — making it a foundation that could realistically be used by a real restaurant in Kigali.
+Updated: June 7, 2026
