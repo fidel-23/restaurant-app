@@ -344,5 +344,68 @@ def update_inventory():
     conn.close()
     return redirect(url_for('inventory'))
 
+@app.route('/admin/products')
+def admin_products():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db()
+    products = conn.execute('SELECT * FROM products').fetchall()
+    conn.close()
+    return render_template('admin/products.html', products=products)
+
+@app.route('/admin/products/add', methods=['GET', 'POST'])
+def add_product():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = float(request.form['price'])
+        category = request.form['category']
+        image = request.form['image']
+        stock = int(request.form['stock'])
+        conn = get_db()
+        conn.execute(
+            'INSERT INTO products (name, description, price, category, image, stock) VALUES (?,?,?,?,?,?)',
+            (name, description, price, category, image, stock)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('admin_products'))
+    return render_template('admin/add_product.html')
+
+@app.route('/admin/products/edit/<int:id>', methods=['GET', 'POST'])
+def edit_product(id):
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db()
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = float(request.form['price'])
+        category = request.form['category']
+        image = request.form['image']
+        stock = int(request.form['stock'])
+        conn.execute(
+            'UPDATE products SET name=?, description=?, price=?, category=?, image=?, stock=? WHERE id=?',
+            (name, description, price, category, image, stock, id)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('admin_products'))
+    product = conn.execute('SELECT * FROM products WHERE id = ?', (id,)).fetchone()
+    conn.close()
+    return render_template('admin/edit_product.html', product=product)
+
+@app.route('/admin/products/delete/<int:id>', methods=['POST'])
+def delete_product(id):
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db()
+    conn.execute('DELETE FROM products WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_products'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

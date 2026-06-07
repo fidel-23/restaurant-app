@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Product - QuickBite Kigali</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script>
+      if (localStorage.getItem("lightMode") === "true") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="{{ url_for('dashboard') }}" class="nav-logo"
+          >🍔 QuickBite Admin</a
+        >
+        <div style="display: flex; gap: 10px">
+          <a href="{{ url_for('admin_products') }}" class="btn-secondary"
+            >← Back to Products</a
+          >
+          <a href="{{ url_for('admin_logout') }}" class="btn-secondary"
+            >Logout</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <section class="dashboard">
+      <h1>➕ Add New Menu Item</h1>
+
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% endif %}
+
+      <div class="dashboard-section" style="max-width: 600px; margin-top: 30px">
+        <form method="POST" action="{{ url_for('add_product') }}">
+          <div class="form-group">
+            <label>Item Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="e.g. Spicy Chicken Burger"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              name="description"
+              rows="3"
+              placeholder="Describe the item..."
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Price (RWF)</label>
+            <input
+              type="number"
+              name="price"
+              placeholder="e.g. 3500"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select
+              name="category"
+              style="
+                width: 100%;
+                padding: 14px 18px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                color: var(--text);
+                font-size: 1rem;
+              "
+            >
+              <option value="Burgers">Burgers</option>
+              <option value="Pizza">Pizza</option>
+              <option value="Sides">Sides</option>
+              <option value="Drinks">Drinks</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <input
+              type="text"
+              name="image"
+              placeholder="https://images.unsplash.com/..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Initial Stock</label>
+            <input
+              type="number"
+              name="stock"
+              placeholder="e.g. 100"
+              value="100"
+              required
+            />
+          </div>
+          <button type="submit" class="btn-primary">Add Item</button>
+        </form>
+      </div>
+    </section>
+  </body>
+</html>
