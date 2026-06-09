@@ -28,7 +28,7 @@ def index():
 def menu():
     conn = get_db()
     cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
-    cursor.execute('SELECT * FROM products')
+    cursor.execute('SELECT * FROM products WHERE restaurant_id = 1 ORDER BY id')
     products = cursor.fetchall()
     conn.close()
     categories = {}
