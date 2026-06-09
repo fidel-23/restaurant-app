@@ -1,3 +1,4 @@
+from email_service import send_order_confirmation, send_order_status_update, send_password_reset
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from database import init_db, seed_db, get_db
 from dotenv import load_dotenv
@@ -201,6 +202,24 @@ def process_payment():
         for item in order_items:
             cursor.execute('UPDATE products SET stock = GREATEST(0, stock - %s) WHERE id = %s',
                           (item['quantity'], item['product_id']))
+
+        print("Customer session:", session.get('customer'))
+        if session.get('customer'):
+            cursor.execute('''
+                SELECT p.name, oi.quantity, oi.price
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE oi.order_id = %s
+            ''', (order_id,))
+            email_items = cursor.fetchall()
+            send_order_confirmation(
+                session['customer']['email'],
+                session['customer']['name'],
+                order_id,
+                email_items,
+                order['total']
+            )
+
         conn.commit()
         conn.close()
         return redirect(url_for('confirmation', order_id=order_id))
@@ -288,8 +307,25 @@ def update_order_status():
     order_id = request.form['order_id']
     status = request.form['status']
     conn = get_db()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
     cursor.execute('UPDATE orders SET status = %s WHERE id = %s', (status, order_id))
+    
+    cursor.execute('''
+        SELECT o.*, c.email, c.name as cname 
+        FROM orders o 
+        LEFT JOIN customers c ON o.customer_id = c.id 
+        WHERE o.id = %s
+    ''', (order_id,))
+    order = cursor.fetchone()
+    
+    if order and order['email']:
+        send_order_status_update(
+            order['email'],
+            order['cname'],
+            order_id,
+            status
+        )
+    
     conn.commit()
     conn.close()
     return redirect(url_for('dashboard'))
@@ -618,7 +654,7 @@ def forgot_password():
             )
             conn.commit()
             reset_link = url_for('reset_password', token=token, _external=True)
-            print(f"Reset link: {reset_link}")
+            send_password_reset(customer['email'], customer['name'], reset_link)
 
         conn.close()
         return render_template('forgot_password.html', success='If an account exists with that email, a reset link has been sent.')
