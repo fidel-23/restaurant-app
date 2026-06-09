@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = 'postgresql://postgres.yrbvkavnqqyjpmuqyyns:Quickbite2024@aws-0-eu-west-3.pooler.supabase.com:5432/postgres'
+
 
 def get_db():
     conn = psycopg2.connect(DATABASE_URL)
