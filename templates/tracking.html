@@ -1,0 +1,103 @@
+{% extends 'base.html' %} {% block content %}
+<section class="tracking-page">
+  <div class="tracking-container">
+    <h1>Order Tracking</h1>
+    <p style="color: var(--text-secondary)">
+      Order #{{ order['id'] }} — {{ order['customer_name'] }}
+    </p>
+
+    <div class="tracking-progress">
+      <div class="progress-bar-container">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="step" id="step-pending">
+          <div class="step-icon">🕐</div>
+          <span>Pending</span>
+        </div>
+        <div class="step" id="step-preparing">
+          <div class="step-icon">👨‍🍳</div>
+          <span>Preparing</span>
+        </div>
+        <div class="step" id="step-on-the-way">
+          <div class="step-icon">🚗</div>
+          <span>On the Way</span>
+        </div>
+        <div class="step" id="step-delivered">
+          <div class="step-icon">✅</div>
+          <span>Delivered</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tracking-status" id="status-message">Loading status...</div>
+
+    <div class="tracking-items">
+      <h3>Items Ordered</h3>
+      {% for item in items %}
+      <div class="tracking-item">
+        <span>{{ item['name'] }} x{{ item['quantity'] }}</span>
+        <span>RWF {{ item['price'] }}</span>
+      </div>
+      {% endfor %}
+      <div class="tracking-total">
+        <strong>Total: RWF {{ order['total'] }}</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const statusSteps = [
+    "pending",
+    "preparing",
+    "on the way",
+    "delivered",
+    "paid",
+  ];
+  const stepIds = [
+    "step-pending",
+    "step-preparing",
+    "step-on-the-way",
+    "step-delivered",
+  ];
+  const progressWidths = ["10%", "40%", "70%", "100%", "100%"];
+  const statusMessages = {
+    pending: "🕐 Your order has been received and is waiting to be confirmed.",
+    preparing: "👨‍🍳 Your order is being prepared in the kitchen.",
+    "on the way": "🚗 Your order is on the way to you!",
+    delivered: "✅ Your order has been delivered. Enjoy your meal!",
+    paid: "✅ Your order has been confirmed and paid.",
+  };
+
+  function updateUI(status) {
+    const index = statusSteps.indexOf(status);
+
+    stepIds.forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.classList.remove("active", "completed");
+      if (i < Math.min(index, 3)) el.classList.add("completed");
+      if (i === Math.min(index, 3)) el.classList.add("active");
+    });
+
+    document.getElementById("progress-fill").style.width =
+      progressWidths[index] || "10%";
+    document.getElementById("status-message").innerText =
+      statusMessages[status] || status;
+  }
+
+  const evtSource = new EventSource('/track/{{ order["id"] }}/stream');
+
+  evtSource.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    updateUI(data.status);
+    if (data.status === "delivered" || data.status === "paid") {
+      evtSource.close();
+    }
+  };
+
+  evtSource.onerror = function () {
+    evtSource.close();
+  };
+</script>
+{% endblock %}

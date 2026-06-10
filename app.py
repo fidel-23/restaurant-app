@@ -693,5 +693,48 @@ def reset_password(token):
     conn.close()
     return render_template('reset_password.html', token=token)
 
+    import time
+import json
+
+@app.route('/track/<int:order_id>')
+def track_order(order_id):
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+    cursor.execute('SELECT * FROM orders WHERE id = %s', (order_id,))
+    order = cursor.fetchone()
+    cursor.execute('''
+        SELECT p.name, oi.quantity, oi.price
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = %s
+    ''', (order_id,))
+    items = cursor.fetchall()
+    conn.close()
+    if not order:
+        return redirect(url_for('index'))
+    return render_template('tracking.html', order=order, items=items)
+
+@app.route('/track/<int:order_id>/stream')
+def track_stream(order_id):
+    def generate():
+        last_status = None
+        attempts = 0
+        while attempts < 200:
+            conn = get_db()
+            cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+            cursor.execute('SELECT status FROM orders WHERE id = %s', (order_id,))
+            order = cursor.fetchone()
+            conn.close()
+            if order:
+                status = order['status']
+                if status != last_status:
+                    last_status = status
+                    yield f"data: {json.dumps({'status': status})}\n\n"
+                if status in ['delivered', 'paid']:
+                    break
+            time.sleep(3)
+            attempts += 1
+    return app.response_class(generate(), mimetype='text/event-stream')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -33,7 +33,12 @@
       <h3>Total: RWF {{ order['total'] }}</h3>
     </div>
 
-    <a href="{{ url_for('menu') }}" class="btn-primary">Order Again</a>
+    <a
+      href="{{ url_for('track_order', order_id=order['id']) }}"
+      class="btn-primary"
+      >Track Order</a
+    >
+    <a href="{{ url_for('menu') }}" class="btn-secondary">Order Again</a>
   </div>
 </section>
 {% endblock %}
