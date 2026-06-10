@@ -2,12 +2,69 @@
 <section class="menu-page">
   <h1>Our Menu</h1>
 
+  <div class="menu-controls">
+    <div class="search-bar">
+      <input
+        type="text"
+        id="menu-search"
+        placeholder="Search for food..."
+        oninput="filterMenu()"
+      />
+    </div>
+    <div class="filter-buttons">
+      <button class="filter-btn active" onclick="filterCategory('all', this)">
+        All
+      </button>
+      <button class="filter-btn" onclick="filterCategory('Burgers', this)">
+        🍔 Burgers
+      </button>
+      <button class="filter-btn" onclick="filterCategory('Pizza', this)">
+        🍕 Pizza
+      </button>
+      <button class="filter-btn" onclick="filterCategory('Sides', this)">
+        🍟 Sides
+      </button>
+      <button class="filter-btn" onclick="filterCategory('Drinks', this)">
+        🥤 Drinks
+      </button>
+    </div>
+    <div class="price-filter">
+      <label>Max Price: RWF <span id="price-value">10000</span></label>
+      <input
+        type="range"
+        id="price-range"
+        min="500"
+        max="10000"
+        value="10000"
+        step="500"
+        oninput="updatePrice(this.value)"
+      />
+    </div>
+  </div>
+
+  <div
+    id="no-results"
+    style="
+      display: none;
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    "
+  >
+    No items found. Try a different search.
+  </div>
+
   {% for category, items in categories.items() %}
-  <div class="category-section">
+  <div class="category-section" data-category="{{ category }}">
     <h2>{{ category }}</h2>
     <div class="product-grid">
       {% for product in items %}
-      <div class="product-card">
+      <div
+        class="product-card"
+        data-name="{{ product['name'] }}"
+        data-price="{{ product['price'] }}"
+        data-category="{{ product['category'] }}"
+      >
         <a href="{{ url_for('product', id=product['id']) }}">
           <img
             src="{{ product['image'] }}"
@@ -34,4 +91,60 @@
   </div>
   {% endfor %}
 </section>
+
+<script>
+  let activeCategory = "all";
+  let maxPrice = 10000;
+
+  function filterMenu() {
+    const search = document.getElementById("menu-search").value.toLowerCase();
+    const cards = document.querySelectorAll(".product-card");
+    const sections = document.querySelectorAll(".category-section");
+    let visibleCount = 0;
+
+    sections.forEach((section) => {
+      let sectionVisible = false;
+      const sectionCategory = section.dataset.category;
+
+      section.querySelectorAll(".product-card").forEach((card) => {
+        const name = card.dataset.name.toLowerCase();
+        const price = parseFloat(card.dataset.price);
+        const category = card.dataset.category;
+
+        const matchSearch = name.includes(search);
+        const matchCategory =
+          activeCategory === "all" || category === activeCategory;
+        const matchPrice = price <= maxPrice;
+
+        if (matchSearch && matchCategory && matchPrice) {
+          card.style.display = "block";
+          sectionVisible = true;
+          visibleCount++;
+        } else {
+          card.style.display = "none";
+        }
+      });
+
+      section.style.display = sectionVisible ? "block" : "none";
+    });
+
+    document.getElementById("no-results").style.display =
+      visibleCount === 0 ? "block" : "none";
+  }
+
+  function filterCategory(category, btn) {
+    activeCategory = category;
+    document
+      .querySelectorAll(".filter-btn")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    filterMenu();
+  }
+
+  function updatePrice(value) {
+    maxPrice = parseInt(value);
+    document.getElementById("price-value").innerText = value;
+    filterMenu();
+  }
+</script>
 {% endblock %}
