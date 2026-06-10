@@ -736,7 +736,7 @@ def track_stream(order_id):
             attempts += 1
     return app.response_class(generate(), mimetype='text/event-stream')
 
-    @app.route('/api/order/<int:order_id>/status')
+@app.route('/api/order/<int:order_id>/status')
 def order_status(order_id):
     conn = get_db()
     cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
