@@ -10,25 +10,27 @@
 
 ## 1. Introduction
 
-QuickBite Kigali is a modern, fully functional restaurant ordering platform designed and developed for a local food business in Kigali, Rwanda. The platform enables customers to browse a categorized menu, add items to a shopping cart, place orders, and pay securely online. The system also features a complete admin panel for managing orders, tracking inventory, and analyzing business performance through real-time charts and statistics.
+QuickBite Kigali is a modern, fully functional restaurant ordering platform designed and developed for a local food business in Kigali, Rwanda. The platform enables customers to create accounts, browse a categorized and searchable menu, add items to a shopping cart, place orders, pay securely online, and track their orders in real time. The system also features a complete admin panel for managing orders, products, inventory, and analyzing business performance through real-time charts, advanced reports, and exportable data.
 
-The application was built using Python and Flask as the backend framework, SQLite as the database, and plain HTML, CSS, and JavaScript for the frontend. It is fully containerized using Docker, tested through a CI/CD pipeline powered by GitHub Actions, and deployed live on Render.com.
+The application was built using Python and Flask as the backend framework, PostgreSQL (hosted on Supabase) as the database, and HTML, CSS, and JavaScript for the frontend. It is fully containerized using Docker, tested through a CI/CD pipeline powered by GitHub Actions, and deployed live on Render.com. The architecture is designed to be multi-tenant ready, allowing the platform to scale to support multiple restaurants in the future.
 
 ---
 
 ## 2. Problem Statement
 
-Many local restaurants in Kigali still rely on phone calls, walk-in orders, or informal messaging to receive customer orders. This approach limits their reach, makes order management difficult, and provides no visibility into business performance. There is a clear need for a simple, affordable, and professional web platform that allows customers to order food online while giving restaurant owners full control of their operations digitally.
+Many local restaurants in Kigali still rely on phone calls, walk-in orders, or informal messaging to receive customer orders. This approach limits their reach, makes order management difficult, and provides no visibility into business performance or customer behavior. There is a clear need for a simple, affordable, and professional web platform that allows customers to order food online, track their orders, and build loyalty with the restaurant, while giving restaurant owners full control and insight into their operations digitally.
 
 ---
 
 ## 3. Objectives
 
 - Design and develop a responsive e-commerce web application for a restaurant
-- Allow customers to browse products by category, view product details, add items to cart, and place orders
+- Allow customers to create accounts, browse products by category, search and filter the menu, add items to cart, and place orders
 - Implement a secure online payment system using Stripe
-- Build an admin dashboard with analytics, charts, order management, and inventory tracking
+- Provide customers with real-time order tracking and email notifications
+- Build an admin dashboard with analytics, charts, advanced reporting, order management, and inventory tracking
 - Automatically decrease inventory stock when an order is paid
+- Design a multi-tenant database architecture to support future expansion to multiple restaurants
 - Containerize the application with Docker and deploy it live using CI/CD
 
 ---
@@ -39,54 +41,57 @@ Many local restaurants in Kigali still rely on phone calls, walk-in orders, or i
 
 - Homepage with hero section, feature highlights, and call-to-action
 - Responsive navigation with hamburger menu for mobile devices
-- Light/Dark mode toggle
-- Menu page with product categories: Burgers, Pizza, Sides, Drinks
-- Real food images on all product cards
+- Light/Dark mode toggle with a custom dark navy and gold theme
+- Customer accounts: registration, login, logout, and profile page
+- Form validation with real-time feedback (email format, password strength, phone format)
+- Guest checkout with automatic linking of guest orders to a new account upon registration
+- Menu page with categories, real food images, search bar, category filters, and price range filter
 - Product detail page with quantity selector and toast notification on add to cart
 - Shopping cart with add, remove, increase, and decrease quantity functionality
-- Checkout form with customer name, phone number, and delivery address
-- Order summary displayed at checkout
+- Checkout form with auto-filled customer details for logged-in users
 - Stripe test payment gateway integration
 - Order confirmation page with full order details
+- Real-time order tracking with a visual progress bar (Pending → Preparing → On the Way → Delivered)
+- Order history and one-click reorder from the profile page
+- Email notifications for order confirmation and order status updates
+- Forgot password and reset password flow
 - About Us page with restaurant story and contact information
-- Customer review and star rating system
+- Customer review and star rating system, accessible from both the About page and customer profile
 - Custom 404 error page
 
 ### Admin Features
 
 - Secure admin login with session-based authentication
-- Analytics dashboard with:
-  - Total orders counter
-  - Total revenue
-  - Total customers
-  - Average order value
-  - Bar chart of popular items
-  - Doughnut chart of revenue by category
-- Order management with status updates (Pending, Preparing, On the Way, Delivered, Paid)
-- Inventory tracker with color indicators:
-  - 🟢 Green: In Stock (50–100%)
-  - 🟡 Yellow: Running Low (20–49%)
-  - 🔴 Red: Out of Stock (0–19%)
+- Analytics dashboard with total orders, revenue, customers, average order value, and charts (bar chart of popular items, doughnut chart of revenue by category)
+- Advanced analytics page with time-frame filters (today, this week, this month, all time, and custom date range)
+- Top customers report and top-selling items report
+- Detailed order table showing customer, items ordered, total, status, and timestamp
+- CSV export of orders for any selected time period
+- Order management with status updates (Pending, Preparing, On the Way, Delivered, Paid), which trigger customer email notifications
+- Inventory tracker with color indicators (green/yellow/red) and manual stock updates
 - Automatic stock decrease when an order is paid
-- Manual stock update per product
+- Full product management: add, edit, and delete menu items directly from the dashboard
 
 ---
 
 ## 5. Technologies Used
 
-| Technology     | Purpose                                       |
-| -------------- | --------------------------------------------- |
-| Python 3.13    | Backend programming language                  |
-| Flask          | Web framework                                 |
-| SQLite         | Database                                      |
-| HTML/CSS       | Frontend structure and styling                |
-| JavaScript     | Cart interactivity, dark mode, hamburger menu |
-| Chart.js       | Analytics charts on admin dashboard           |
-| Stripe         | Test payment processing                       |
-| python-dotenv  | Secure environment variable management        |
-| Docker         | Application containerization                  |
-| GitHub Actions | CI/CD pipeline                                |
-| Render.com     | Live cloud deployment                         |
+| Technology            | Purpose                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| Python 3.13           | Backend programming language                                                           |
+| Flask                 | Web framework                                                                          |
+| PostgreSQL (Supabase) | Persistent, cloud-hosted database                                                      |
+| psycopg2              | PostgreSQL database driver                                                             |
+| bcrypt                | Secure password hashing                                                                |
+| HTML/CSS              | Frontend structure and styling                                                         |
+| JavaScript            | Cart interactivity, dark mode, hamburger menu, live order tracking, menu search/filter |
+| Chart.js              | Analytics charts on admin dashboard                                                    |
+| Stripe                | Test payment processing                                                                |
+| SendGrid              | Transactional email notifications                                                      |
+| python-dotenv         | Secure environment variable management                                                 |
+| Docker                | Application containerization                                                           |
+| GitHub Actions        | CI/CD pipeline                                                                         |
+| Render.com            | Live cloud deployment                                                                  |
 
 ---
 
@@ -94,30 +99,36 @@ Many local restaurants in Kigali still rely on phone calls, walk-in orders, or i
 
 The application follows a three-layer architecture:
 
-- **Frontend:** HTML templates rendered by Flask using the Jinja2 templating engine, styled with custom CSS using a dark navy color palette, and made interactive with JavaScript
-- **Backend:** Flask handles all routing, session management, cart logic, payment processing, and admin functionality
-- **Database:** SQLite stores all application data across five tables: products, orders, order_items, admin, and reviews
+- **Frontend:** HTML templates rendered by Flask using the Jinja2 templating engine, styled with a custom dark navy and gold theme, and made interactive with JavaScript (cart management, live order tracking via polling, menu search and filtering, dark/light mode)
+- **Backend:** Flask handles all routing, session management, authentication, cart logic, payment processing, email notifications, and admin functionality
+- **Database:** PostgreSQL (hosted on Supabase) stores all application data, designed with multi-tenancy in mind via a `restaurant_id` column on relevant tables
 
 **Request Flow:**  
-Browser → Flask Route → Database Query → Jinja2 Template → Rendered HTML → Browser
+Browser → Flask Route → Database Query (Supabase PostgreSQL) → Jinja2 Template → Rendered HTML → Browser
+
+**Real-Time Tracking Flow:**  
+Browser polls `/api/order/<id>/status` every 3 seconds → Flask queries the database → Returns current status as JSON → JavaScript updates the progress bar live
 
 ---
 
 ## 7. Database Structure
 
-| Table       | Purpose                                                                     |
-| ----------- | --------------------------------------------------------------------------- |
-| products    | Stores menu items with name, description, price, category, image, and stock |
-| orders      | Stores customer orders with name, phone, address, total, and status         |
-| order_items | Links orders to products with quantity and price                            |
-| admin       | Stores admin credentials                                                    |
-| reviews     | Stores customer feedback and star ratings                                   |
+| Table           | Purpose                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| restaurants     | Stores restaurant information (multi-tenant ready)                                                  |
+| customers       | Stores customer accounts with hashed passwords                                                      |
+| products        | Stores menu items with name, description, price, category, image, and stock, linked to a restaurant |
+| orders          | Stores customer orders, linked to both a restaurant and a customer (if registered)                  |
+| order_items     | Links orders to products with quantity and price                                                    |
+| admin           | Stores admin credentials, linked to a restaurant                                                    |
+| reviews         | Stores customer feedback and star ratings                                                           |
+| password_resets | Stores secure tokens for password reset requests                                                    |
 
 ---
 
 ## 8. Screenshots
 
-_(Screenshots of: Homepage, Menu, Product Detail, Cart, Checkout, Payment, Confirmation, About Us, Admin Dashboard, Inventory Tracker)_
+_(Add screenshots of: Homepage, Menu with search/filter, Product Detail, Cart, Checkout, Payment, Confirmation, Order Tracking, Customer Profile, About Us, Admin Dashboard, Admin Analytics, Inventory Tracker, Product Management)_
 
 ---
 
@@ -159,32 +170,36 @@ This ensures that every code change is automatically tested and verified before 
 
 The application is fully containerized using Docker. The `Dockerfile` defines the build process and the `docker-compose.yml` manages the service configuration.
 
-## **To run locally with Docker:**
+**To run locally with Docker:**
+
+---
 
 ## 14. Challenges Encountered
 
 - Configuring Docker to bind to `0.0.0.0` instead of `127.0.0.1` so the app was accessible outside the container
 - Managing Flask sessions for the shopping cart and resolving ID type mismatches between integers and strings
-- Setting up Stripe environment variables securely on Render without exposing secret keys in the codebase
-- Making the application fully responsive on mobile devices
-- Fixing dynamically rendered cart buttons that lost their event listeners after re-rendering
+- Migrating from SQLite to PostgreSQL to solve Render's free-tier data persistence issue, including resolving an IPv6/IPv4 connectivity mismatch by switching to Supabase's session pooler connection string
+- Restructuring the database schema for multi-tenant readiness without breaking existing functionality
+- Setting up Stripe and SendGrid securely within Render's free-tier environment variable limits
+- Implementing real-time order tracking using polling after discovering Server-Sent Events were unreliable on Render's free tier
+- Fixing PostgreSQL's non-deterministic row ordering, which caused the menu category order to change unexpectedly
+- Making the application fully responsive on mobile devices, including a hamburger navigation menu
 
 ---
 
 ## 15. Future Work
 
 - Integrate Mobile Money payment gateway (MTN MoMo or Airtel Money) for local customers
-- Add real-time order tracking so customers can follow their delivery
-- Allow admin to add, edit, and delete menu items directly from the dashboard
-- Add email or SMS notifications for order confirmation
-- Build a dedicated mobile application
+- Build a rule-based customer support chatbot for FAQs, order tracking, and menu search
 - Implement multi-language support (English, Kinyarwanda, French)
+- Add SMS notifications for order updates
+- Build a dedicated mobile application or Progressive Web App (PWA)
+- Evolve the platform into a full multi-tenant SaaS product for multiple restaurants
 
 ---
 
 ## 16. Conclusion
 
-QuickBite Kigali is a complete, production-ready e-commerce web application built from scratch using modern tools and best practices. The platform solves a real problem for local restaurants in Rwanda by bringing their operations online in a simple, affordable, and professional way. Every requirement of the project brief has been met — including responsive UI, database integration, shopping cart, checkout, payment, GitHub version control, Docker containerization, CI/CD pipeline, and live deployment.
+QuickBite Kigali is a complete, production-ready e-commerce web application built from scratch using modern tools and best practices. The platform solves a real problem for local restaurants in Rwanda by bringing their operations online in a simple, affordable, and professional way. Every requirement of the project brief has been met and substantially exceeded — including customer accounts, real-time order tracking, email notifications, advanced analytics, persistent cloud database, responsive UI, shopping cart, checkout, payment, GitHub version control, Docker containerization, CI/CD pipeline, and live deployment.
 
-The project demonstrates not just technical implementation but also business thinking — from inventory management to analytics — making it a foundation that could realistically be used by a real restaurant in Kigali.
-Updated: June 7, 2026
+The project demonstrates not just technical implementation but also business thinking — from inventory management to customer analytics to multi-tenant architecture — making it a strong foundation for a real SaaS product that could be offered to restaurants across Rwanda and beyond.
