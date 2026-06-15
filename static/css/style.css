@@ -1661,3 +1661,48 @@ body.light-mode .order-card-footer {
   flex: 1;
   accent-color: var(--accent);
 }
+
+/* ─── ANALYTICS TIME FILTER ─── */
+.time-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.time-filter .filter-btn {
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* ─── CUSTOM DATE FILTER ─── */
+.custom-date-filter {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.custom-date-filter label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.custom-date-filter input[type="date"] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.custom-date-filter input[type="date"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}

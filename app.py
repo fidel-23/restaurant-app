@@ -745,5 +745,142 @@ def order_status(order_id):
     conn.close()
     return jsonify({'status': order['status'] if order else 'unknown'})
 
+    import csv
+import io
+from flask import Response
+
+@app.route('/admin/analytics')
+def analytics():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+
+    period = request.args.get('period', 'today')
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+
+    params = [1]
+    if period == 'today':
+        date_filter = "AND o.created_at >= CURRENT_DATE"
+    elif period == 'week':
+        date_filter = "AND o.created_at >= CURRENT_DATE - INTERVAL '7 days'"
+    elif period == 'month':
+        date_filter = "AND o.created_at >= CURRENT_DATE - INTERVAL '30 days'"
+    elif period == 'custom' and start_date and end_date:
+        date_filter = "AND o.created_at >= %s AND o.created_at < (%s::date + INTERVAL '1 day')"
+        params.extend([start_date, end_date])
+    else:
+        date_filter = ""
+        period = 'all'
+
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+
+    cursor.execute(f'SELECT COUNT(*) as count FROM orders o WHERE o.restaurant_id = %s {date_filter}', params)
+    total_orders = cursor.fetchone()['count']
+
+    cursor.execute(f'SELECT SUM(total) as total FROM orders o WHERE o.restaurant_id = %s {date_filter}', params)
+    total_revenue = cursor.fetchone()['total'] or 0
+
+    cursor.execute(f'SELECT COUNT(DISTINCT customer_phone) as count FROM orders o WHERE o.restaurant_id = %s {date_filter}', params)
+    unique_customers = cursor.fetchone()['count']
+
+    avg_order = total_revenue / total_orders if total_orders > 0 else 0
+
+    cursor.execute(f'''
+        SELECT customer_name, customer_phone, COUNT(*) as order_count, SUM(total) as total_spent
+        FROM orders o
+        WHERE o.restaurant_id = %s {date_filter}
+        GROUP BY customer_name, customer_phone
+        ORDER BY total_spent DESC
+        LIMIT 5
+    ''', params)
+    top_customers = cursor.fetchall()
+
+    cursor.execute(f'''
+        SELECT p.name, SUM(oi.quantity) as qty_sold, SUM(oi.quantity * oi.price) as revenue
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.restaurant_id = %s {date_filter}
+        GROUP BY p.name
+        ORDER BY qty_sold DESC
+        LIMIT 5
+    ''', params)
+    top_items = cursor.fetchall()
+
+    cursor.execute(f'''
+        SELECT o.*, string_agg(p.name || ' x' || oi.quantity::text, ', ') as items_summary
+        FROM orders o
+        LEFT JOIN order_items oi ON oi.order_id = o.id
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE o.restaurant_id = %s {date_filter}
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+    ''', params)
+    all_orders = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('admin/analytics.html',
+        period=period,
+        start_date=start_date,
+        end_date=end_date,
+        total_orders=total_orders,
+        total_revenue=total_revenue,
+        unique_customers=unique_customers,
+        avg_order=avg_order,
+        top_customers=top_customers,
+        top_items=top_items,
+        all_orders=all_orders
+    )
+
+@app.route('/admin/export-orders')
+def export_orders():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+
+    period = request.args.get('period', 'today')
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+
+    params = [1]
+    if period == 'today':
+        date_filter = "AND created_at >= CURRENT_DATE"
+    elif period == 'week':
+        date_filter = "AND created_at >= CURRENT_DATE - INTERVAL '7 days'"
+    elif period == 'month':
+        date_filter = "AND created_at >= CURRENT_DATE - INTERVAL '30 days'"
+    elif period == 'custom' and start_date and end_date:
+        date_filter = "AND created_at >= %s AND created_at < (%s::date + INTERVAL '1 day')"
+        params.extend([start_date, end_date])
+    else:
+        date_filter = ""
+
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+    cursor.execute(f'''
+        SELECT * FROM orders
+        WHERE restaurant_id = %s {date_filter}
+        ORDER BY created_at DESC
+    ''', params)
+    orders = cursor.fetchall()
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Order ID', 'Customer Name', 'Phone', 'Address', 'Total', 'Status', 'Date'])
+    for order in orders:
+        writer.writerow([
+            order['id'], order['customer_name'], order['customer_phone'],
+            order['customer_address'], order['total'], order['status'],
+            order['created_at'].strftime('%Y-%m-%d %H:%M')
+        ])
+
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=orders_{period}.csv'}
+    )
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

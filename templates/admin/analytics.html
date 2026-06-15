@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics - QuickBite Kigali</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script>
+      if (localStorage.getItem("lightMode") === "true") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="{{ url_for('dashboard') }}" class="nav-logo"
+          >🍔 QuickBite Admin</a
+        >
+        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+          <a href="{{ url_for('dashboard') }}" class="btn-secondary"
+            >📊 Dashboard</a
+          >
+          <a href="{{ url_for('admin_products') }}" class="btn-secondary"
+            >🍽️ Products</a
+          >
+          <a href="{{ url_for('inventory') }}" class="btn-secondary"
+            >📦 Inventory</a
+          >
+          <a href="{{ url_for('admin_logout') }}" class="btn-secondary"
+            >Logout</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <section class="dashboard">
+      <h1>📈 Advanced Analytics</h1>
+
+      <div class="time-filter">
+        <a
+          href="{{ url_for('analytics', period='today') }}"
+          class="filter-btn {% if period == 'today' %}active{% endif %}"
+          >Today</a
+        >
+        <a
+          href="{{ url_for('analytics', period='week') }}"
+          class="filter-btn {% if period == 'week' %}active{% endif %}"
+          >This Week</a
+        >
+        <a
+          href="{{ url_for('analytics', period='month') }}"
+          class="filter-btn {% if period == 'month' %}active{% endif %}"
+          >This Month</a
+        >
+        <a
+          href="{{ url_for('analytics', period='all') }}"
+          class="filter-btn {% if period == 'all' %}active{% endif %}"
+          >All Time</a
+        >
+      </div>
+
+      <form
+        method="GET"
+        action="{{ url_for('analytics') }}"
+        class="custom-date-filter"
+      >
+        <input type="hidden" name="period" value="custom" />
+        <label
+          >From:
+          <input
+            type="date"
+            name="start_date"
+            value="{{ start_date }}"
+            required
+        /></label>
+        <label
+          >To:
+          <input type="date" name="end_date" value="{{ end_date }}" required
+        /></label>
+        <button
+          type="submit"
+          class="filter-btn {% if period == 'custom' %}active{% endif %}"
+        >
+          📅 Apply
+        </button>
+        <a
+          href="{{ url_for('export_orders', period=period, start_date=start_date, end_date=end_date) }}"
+          class="btn-primary"
+          style="margin-left: auto"
+          >⬇️ Export CSV</a
+        >
+      </form>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h2>{{ total_orders }}</h2>
+          <p>Orders</p>
+        </div>
+        <div class="stat-card" style="background: #2a9d8f">
+          <h2>RWF {{ "%.0f"|format(total_revenue) }}</h2>
+          <p>Revenue</p>
+        </div>
+        <div class="stat-card" style="background: #e9c46a; color: #333">
+          <h2>{{ unique_customers }}</h2>
+          <p>Unique Customers</p>
+        </div>
+        <div class="stat-card" style="background: #264653">
+          <h2>RWF {{ "%.0f"|format(avg_order) }}</h2>
+          <p>Avg Order Value</p>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-section">
+          <h2>Top Customers</h2>
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Orders</th>
+                <th>Total Spent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for customer in top_customers %}
+              <tr>
+                <td>{{ customer['customer_name'] }}</td>
+                <td>{{ customer['customer_phone'] }}</td>
+                <td>{{ customer['order_count'] }}</td>
+                <td style="color: var(--accent); font-weight: 700">
+                  RWF {{ customer['total_spent'] }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="dashboard-section">
+          <h2>Top Selling Items</h2>
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty Sold</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in top_items %}
+              <tr>
+                <td>{{ item['name'] }}</td>
+                <td>{{ item['qty_sold'] }}</td>
+                <td style="color: var(--accent); font-weight: 700">
+                  RWF {{ item['revenue'] }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="dashboard-section" style="margin-top: 30px">
+        <h2>All Orders — {{ period|title }}</h2>
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Date & Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in all_orders %}
+            <tr>
+              <td>{{ order['id'] }}</td>
+              <td>{{ order['customer_name'] }}</td>
+              <td>{{ order['customer_phone'] }}</td>
+              <td style="font-size: 0.85rem; color: var(--text-secondary)">
+                {{ order['items_summary'] }}
+              </td>
+              <td style="color: var(--accent); font-weight: 700">
+                RWF {{ order['total'] }}
+              </td>
+              <td>
+                <span class="status-badge status-{{ order['status'] }}"
+                  >{{ order['status'] }}</span
+                >
+              </td>
+              <td style="font-size: 0.85rem">
+                {{ order['created_at'].strftime('%b %d, %Y %H:%M') }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </body>
+</html>

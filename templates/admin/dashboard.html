@@ -19,6 +19,7 @@
         <a href="{{ url_for('dashboard') }}" class="nav-logo">🍔 QuickBite Admin</a>
         <div style="display:flex; gap:10px;">
             <a href="{{ url_for('admin_products') }}" class="btn-secondary">🍽️ Products</a>
+<a href="{{ url_for('analytics') }}" class="btn-secondary">📈 Analytics</a>
 <a href="{{ url_for('inventory') }}" class="btn-secondary">📦 Inventory</a>
             <a href="{{ url_for('admin_logout') }}" class="btn-secondary">Logout</a>
         </div>
@@ -88,7 +89,7 @@
                     <td>
                         <form method="POST" action="{{ url_for('update_order_status') }}">
                             <input type="hidden" name="order_id" value="{{ order['id'] }}">
-                            <select name="status" onchange="this.form.submit()">
+                           F <select name="status" onchange="this.form.submit()">
                                 <option value="pending" {% if order['status'] == 'pending' %}selected{% endif %}>Pending</option>
                                 <option value="preparing" {% if order['status'] == 'preparing' %}selected{% endif %}>Preparing</option>
                                 <option value="on the way" {% if order['status'] == 'on the way' %}selected{% endif %}>On the Way</option>
