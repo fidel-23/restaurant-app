@@ -1,0 +1,35 @@
+<div id="chatbot-widget">
+  <button id="chatbot-toggle" onclick="toggleChatbot()">
+    <span id="chatbot-icon-open">💬</span>
+    <span id="chatbot-icon-close" style="display: none">✕</span>
+  </button>
+
+  <div id="chatbot-window" class="chatbot-hidden">
+    <div class="chatbot-header">
+      <div>
+        <strong>QuickBite Assistant</strong>
+        <p class="chatbot-status">🟢 Online</p>
+      </div>
+    </div>
+
+    <div class="chatbot-messages" id="chatbot-messages"></div>
+
+    <div class="chatbot-quick-replies" id="chatbot-quick-replies">
+      <button onclick="sendQuickReply('menu')">📋 View Menu</button>
+      <button onclick="sendQuickReply('hours')">🕐 Opening Hours</button>
+      <button onclick="sendQuickReply('location')">📍 Location</button>
+      <button onclick="sendQuickReply('track order')">📦 Track My Order</button>
+      <button onclick="sendQuickReply('contact')">💬 Contact Us</button>
+    </div>
+
+    <div class="chatbot-input-area">
+      <input
+        type="text"
+        id="chatbot-input"
+        placeholder="Type your message..."
+        onkeypress="if (event.key === 'Enter') sendChatMessage();"
+      />
+      <button onclick="sendChatMessage()">➤</button>
+    </div>
+  </div>
+</div>

@@ -882,5 +882,72 @@ def export_orders():
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment; filename=orders_{period}.csv'}
     )
+
+@app.route('/api/chatbot/popular')
+def chatbot_popular():
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+    cursor.execute('''
+        SELECT p.id, p.name, p.price, SUM(oi.quantity) as total_sold
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        WHERE p.restaurant_id = 1
+        GROUP BY p.id, p.name, p.price
+        ORDER BY total_sold DESC
+        LIMIT 3
+    ''')
+    items = cursor.fetchall()
+    conn.close()
+    return jsonify({'items': [{'name': i['name'], 'price': i['price']} for i in items]})
+
+@app.route('/api/chatbot/search-item')
+def chatbot_search_item():
+    name = request.args.get('name', '').strip()
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+    cursor.execute('''
+        SELECT id, name, price FROM products
+        WHERE restaurant_id = 1 AND LOWER(name) LIKE %s
+        LIMIT 1
+    ''', (f'%{name.lower()}%',))
+    item = cursor.fetchone()
+
+    if not item:
+        cursor.execute('''
+            SELECT id, name, price FROM products
+            WHERE restaurant_id = 1
+            ORDER BY similarity(LOWER(name), %s) DESC
+            LIMIT 1
+        ''', (name.lower(),))
+        candidate = cursor.fetchone()
+        if candidate:
+            item = candidate
+
+    conn.close()
+    if item:
+        return jsonify({'found': True, 'id': item['id'], 'name': item['name'], 'price': item['price']})
+    return jsonify({'found': False})
+
+@app.route('/admin/chat-logs')
+def chat_logs_page():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+    cursor.execute('SELECT * FROM chat_logs WHERE restaurant_id = 1 ORDER BY created_at DESC')
+    logs = cursor.fetchall()
+    conn.close()
+    return render_template('admin/chat_logs.html', logs=logs)
+
+@app.route('/admin/chat-logs/resolve/<int:id>', methods=['POST'])
+def resolve_chat_log(id):
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE chat_logs SET resolved = TRUE WHERE id = %s', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('chat_logs_page'))
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

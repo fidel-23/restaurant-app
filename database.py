@@ -109,6 +109,14 @@ def init_db():
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chat_logs (
+            id SERIAL PRIMARY KEY,
+            restaurant_id INTEGER REFERENCES restaurants(id),
+            message TEXT NOT NULL,
+            resolved BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )     ''')
     conn.commit()
     conn.close()
 
