@@ -1,3 +1,4 @@
+import bcrypt
 import psycopg2
 import psycopg2.extras
 import os
@@ -160,9 +161,10 @@ def seed_db():
 
     cursor.execute("SELECT COUNT(*) FROM admin")
     if cursor.fetchone()[0] == 0:
+        hashed_admin_password = bcrypt.hashpw('quickbite2024'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         cursor.execute(
             'INSERT INTO admin (restaurant_id, username, password) VALUES (1, %s, %s)',
-            ('admin', 'quickbite2024')
+            ('admin', hashed_admin_password)
         )
 
     conn.commit()

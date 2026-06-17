@@ -236,8 +236,10 @@ def admin_login():
         password = request.form['password']
         conn = get_db()
         cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
-        cursor.execute('SELECT * FROM admin WHERE username = %s AND password = %s', (username, password))
+        cursor.execute('SELECT * FROM admin WHERE username = %s', (username,))
         admin = cursor.fetchone()
+        if admin and not bcrypt.checkpw(password.encode('utf-8'), admin['password'].encode('utf-8')):
+            admin = None
         conn.close()
         if admin:
             session['admin'] = True
@@ -950,4 +952,5 @@ def resolve_chat_log(id):
     conn.close()
     return redirect(url_for('chat_logs_page'))
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    debug_mode = os.getenv('RENDER') != 'true'
+app.run(host='0.0.0.0', port=5000, debug=debug_mode)

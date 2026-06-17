@@ -65,9 +65,8 @@
   border-bottom: 1px solid var(--border);
 }
 
-.chatbot-header strong {
-  font-size: 1rem;
-  color: var(--accent);
+.chatbot-header {
+  background: linear-gradient(135deg, var(--bg), var(--border));
 }
 
 .chatbot-status {
