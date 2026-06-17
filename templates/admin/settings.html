@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - QuickBite Kigali</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script>
+      if (localStorage.getItem("lightMode") === "true") {
+        document.body.classList.add("light-mode");
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="{{ url_for('dashboard') }}" class="nav-logo"
+          >QuickBite Admin</a
+        >
+        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+          <a href="{{ url_for('dashboard') }}" class="btn-secondary"
+            >Dashboard</a
+          >
+          <a href="{{ url_for('admin_logout') }}" class="btn-secondary"
+            >Logout</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <section class="dashboard">
+      <h1>⚙️ Admin Settings</h1>
+
+      {% if error %}
+      <div class="auth-error" style="max-width: 480px">❌ {{ error }}</div>
+      {% endif %} {% if success %}
+      <div class="success-message" style="max-width: 480px">
+        ✅ {{ success }}
+      </div>
+      {% endif %}
+
+      <div class="dashboard-section" style="max-width: 480px; margin-top: 30px">
+        <h2>Change Password</h2>
+        <form method="POST" action="{{ url_for('admin_settings') }}">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" name="current_password" required />
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input
+              type="password"
+              name="new_password"
+              id="new_password"
+              placeholder="At least 8 characters"
+              required
+            />
+            <span class="field-error" id="new-password-error"></span>
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              name="confirm_password"
+              id="confirm_password"
+              required
+            />
+            <span class="field-error" id="confirm-password-error"></span>
+          </div>
+          <button type="submit" class="btn-primary">Update Password</button>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      document
+        .getElementById("new_password")
+        .addEventListener("input", function () {
+          document.getElementById("new-password-error").innerText =
+            this.value.length < 8 ? "Must be at least 8 characters" : "";
+        });
+      document
+        .getElementById("confirm_password")
+        .addEventListener("input", function () {
+          const match =
+            this.value === document.getElementById("new_password").value;
+          document.getElementById("confirm-password-error").innerText = match
+            ? ""
+            : "Passwords do not match";
+        });
+    </script>
+  </body>
+</html>

@@ -951,6 +951,39 @@ def resolve_chat_log(id):
     conn.commit()
     conn.close()
     return redirect(url_for('chat_logs_page'))
+
+@app.route('/admin/settings', methods=['GET', 'POST'])
+def admin_settings():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+
+    error = None
+    success = None
+
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        conn = get_db()
+        cursor = conn.cursor(cursor_factory=__import__('psycopg2').extras.RealDictCursor)
+        cursor.execute('SELECT * FROM admin WHERE restaurant_id = 1')
+        admin = cursor.fetchone()
+
+        if not bcrypt.checkpw(current_password.encode('utf-8'), admin['password'].encode('utf-8')):
+            error = 'Current password is incorrect.'
+        elif len(new_password) < 8:
+            error = 'New password must be at least 8 characters.'
+        elif new_password != confirm_password:
+            error = 'New passwords do not match.'
+        else:
+            new_hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cursor.execute('UPDATE admin SET password = %s WHERE restaurant_id = 1', (new_hashed,))
+            conn.commit()
+            success = 'Password updated successfully.'
+
+        conn.close()
+    return render_template('admin/settings.html', error=error, success=success)
 if __name__ == '__main__':
     debug_mode = os.getenv('RENDER') != 'true'
 app.run(host='0.0.0.0', port=5000, debug=debug_mode)
