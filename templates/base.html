@@ -28,7 +28,7 @@
           {% if session.get('customer') %}
           <li>
             <a href="{{ url_for('profile') }}"
-              >👤 {{ session['customer']['name'].split()[0] }}</a
+              >{{ session['customer']['name'].split()[0] }}</a
             >
           </li>
           <li>
