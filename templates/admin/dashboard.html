@@ -36,19 +36,18 @@
             <h2>{{ total_orders }}</h2>
             <p>Total Orders</p>
         </div>
-        <div class="stat-card" style="background:#2a9d8f;">
-            <h2>RWF {{ "%.0f"|format(total_revenue) }}</h2>
-            <p>Total Revenue</p>
-        </div>
-        <div class="stat-card" style="background:#e9c46a; color:#333;">
-            <h2>{{ total_customers }}</h2>
-            <p>Total Customers</p>
-        </div>
-        <div class="stat-card" style="background:#264653;">
-            <h2>RWF {{ "%.0f"|format(avg_order_value) }}</h2>
-            <p>Avg Order Value</p>
-        </div>
-    </div>
+        <div class="stat-card">
+    <h2>RWF {{ "%.0f"|format(total_revenue) }}</h2>
+    <p>Total Revenue</p>
+</div>
+<div class="stat-card">
+    <h2>{{ total_customers }}</h2>
+    <p>Total Customers</p>
+</div>
+<div class="stat-card">
+    <h2>RWF {{ "%.0f"|format(avg_order_value) }}</h2>
+    <p>Avg Order Value</p>
+</div>
 
     <div class="dashboard-grid">
         <div class="dashboard-section">

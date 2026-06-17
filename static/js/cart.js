@@ -35,12 +35,6 @@ function toggleDarkMode() {
   document.body.classList.toggle("light-mode");
   const isLight = document.body.classList.contains("light-mode");
   localStorage.setItem("lightMode", isLight);
-  updateDarkModeButton(isLight);
-}
-
-function updateDarkModeButton(isLight) {
-  const btn = document.getElementById("dark-mode-btn");
-  if (btn) btn.innerText = isLight ? "🌙 Dark Mode" : "☀️ Light Mode";
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -48,9 +42,4 @@ document.addEventListener("DOMContentLoaded", function () {
   if (savedMode === "true") {
     document.body.classList.add("light-mode");
   }
-  updateDarkModeButton(savedMode === "true");
 });
-function toggleMenu() {
-  const nav = document.getElementById("nav-links");
-  nav.classList.toggle("open");
-}

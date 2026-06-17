@@ -100,20 +100,18 @@
           <h2>{{ total_orders }}</h2>
           <p>Orders</p>
         </div>
-        <div class="stat-card" style="background: #2a9d8f">
-          <h2>RWF {{ "%.0f"|format(total_revenue) }}</h2>
-          <p>Revenue</p>
-        </div>
-        <div class="stat-card" style="background: #e9c46a; color: #333">
-          <h2>{{ unique_customers }}</h2>
-          <p>Unique Customers</p>
-        </div>
-        <div class="stat-card" style="background: #264653">
-          <h2>RWF {{ "%.0f"|format(avg_order) }}</h2>
-          <p>Avg Order Value</p>
-        </div>
-      </div>
-
+        <div class="stat-card">
+    <h2>RWF {{ "%.0f"|format(total_revenue) }}</h2>
+    <p>Revenue</p>
+</div>
+<div class="stat-card">
+    <h2>{{ unique_customers }}</h2>
+    <p>Unique Customers</p>
+</div>
+<div class="stat-card">
+    <h2>RWF {{ "%.0f"|format(avg_order) }}</h2>
+    <p>Avg Order Value</p>
+</div>
       <div class="dashboard-grid">
         <div class="dashboard-section">
           <h2>Top Customers</h2>
