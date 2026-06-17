@@ -1,6 +1,6 @@
 # 🍔 QuickBite Kigali
 
-A modern, full-stack restaurant ordering platform built for local businesses in Kigali, Rwanda. Customers can browse the menu, create accounts, order food, pay online, and track their delivery in real time. Restaurant admins get a complete dashboard with analytics, inventory management, and order control.
+A modern, full-stack restaurant ordering platform built for local businesses in Kigali, Rwanda. Customers can browse the menu, create accounts, order food, pay online, track their delivery in real time, and chat with an AI-free assistant for instant answers. Restaurant admins get a complete dashboard with analytics, inventory management, and order control.
 
 **Live Site:** [restaurant-app-0oya.onrender.com](https://restaurant-app-0oya.onrender.com)
 
@@ -16,8 +16,9 @@ A modern, full-stack restaurant ordering platform built for local businesses in 
 - 💳 Secure checkout with Stripe payment (test mode)
 - 📦 Real-time order tracking with visual progress bar
 - 📧 Email notifications for order confirmation and status updates
+- 💬 Built-in chatbot for FAQs, order tracking, item prices, and popular picks — with typo-tolerant search
 - ⭐ Customer reviews and star ratings
-- 🌙 Dark / Light mode toggle
+- 🌙 Light / Dark mode with an animated sun-moon toggle switch
 - 📱 Fully responsive with mobile hamburger menu
 
 ### For Admins
@@ -28,6 +29,8 @@ A modern, full-stack restaurant ordering platform built for local businesses in 
 - 📦 Inventory tracker with color-coded stock levels
 - 🍽️ Full product management (add, edit, delete menu items)
 - 📋 Order status management with automatic customer notifications
+- 💬 Chat log review for questions the chatbot couldn't answer
+- ⚙️ Self-service password change, with bcrypt-hashed credentials
 
 ---
 
@@ -44,6 +47,12 @@ A modern, full-stack restaurant ordering platform built for local businesses in 
 | Containerization | Docker                |
 | CI/CD            | GitHub Actions        |
 | Hosting          | Render                |
+
+---
+
+## 🎨 Design
+
+QuickBite uses a custom "Emerald & Cream" visual identity — deep emerald green paired with warm antique gold, set in Playfair Display (headings) and Inter (body text). The palette and fonts are controlled centrally through CSS variables in `static/css/style.css`, so the entire site's look can be restyled from one place.
 
 ---
 
@@ -104,23 +113,22 @@ restaurant-app/
 
 ├── templates/ # HTML pages
 
+│ ├── chat_widget.html # Chatbot UI, included on every page
+
 │ └── admin/ # Admin panel pages
 
 └── static/
 
-├── css/ # Styling
+├── css/ # Styling, including chatbot.css
 
-└── js/ # Cart, dark mode, tracking
+└── js/ # Cart, dark mode, tracking, chatbot logic
 
 ---
 
 ## 🔑 Admin Access
 
 URL: /admin/login
-
-Username: admin
-
-Password: quickbite2024
+Credentials are set during initial database seeding and can be changed any time from **Admin → Settings** once logged in.
 
 ---
 
