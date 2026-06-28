@@ -13,9 +13,7 @@
     <nav class="navbar">
       <div class="nav-container">
         <a href="{{ url_for('index') }}" class="nav-logo">QuickBite Kigali</a>
-        <button class="hamburger" id="hamburger" onclick="toggleMenu()">
-          ☰
-        </button>
+        <button class="hamburger" id="hamburger">☰</button>
         <ul class="nav-links" id="nav-links">
           <li><a href="{{ url_for('index') }}">Home</a></li>
           <li><a href="{{ url_for('menu') }}">Menu</a></li>
@@ -71,5 +69,10 @@
 
     <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    <script>
+      document
+        .getElementById("hamburger")
+        .addEventListener("click", toggleMenu);
+    </script>
   </body>
 </html>
